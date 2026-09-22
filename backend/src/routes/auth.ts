@@ -7,7 +7,6 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { authMiddleware } from '../middleware/jwt';
 import { sendPasswordReset, sendWelcomeEmail, APP_URL } from '../services/email';
-import { rateLimit } from '../middleware/rateLimit';
 
 const authRoute = new OpenAPIHono();
 const SECRET = process.env.JWT_SECRET || 'super-secret-elearning-key';
@@ -64,7 +63,6 @@ const RegisterSchema = z.object({
 const registerRoute = createRoute({
   method: 'post',
   path: '/register',
-  middleware: [rateLimit({ limit: 3, windowMs: 60 * 60 * 1000, name: 'register' })],
   request: { body: { content: { 'application/json': { schema: RegisterSchema } } } },
   responses: {
     201: { description: 'Success', content: { 'application/json': { schema: z.object({ message: z.string(), id: z.string() }) } } },
@@ -109,7 +107,6 @@ const LoginSchema = z.object({
 const loginRoute = createRoute({
   method: 'post',
   path: '/login',
-  middleware: [rateLimit({ limit: 5, windowMs: 15 * 60 * 1000, name: 'login' })],
   request: { body: { content: { 'application/json': { schema: LoginSchema } } } },
   responses: {
     200: { description: 'Success', content: { 'application/json': { schema: z.any() } } },
@@ -322,7 +319,6 @@ const ForgotPasswordSchema = z.object({
 const forgotPasswordRoute = createRoute({
   method: 'post',
   path: '/forgot-password',
-  middleware: [rateLimit({ limit: 3, windowMs: 60 * 60 * 1000, name: 'forgot' })],
   request: { body: { content: { 'application/json': { schema: ForgotPasswordSchema } } } },
   responses: { 200: { description: 'OK' } },
 });

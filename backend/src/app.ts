@@ -1,6 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { cors } from 'hono/cors';
+import { bodyLimit } from 'hono/body-limit';
 import { logger } from 'hono/logger';
 import 'dotenv/config';
 import fs from 'fs';
@@ -31,6 +32,13 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 
 // Global error handler: log server-side, jangan bocorkan detail internal ke klien.
 app.onError((err, c) => {
+  // Error 4xx dari middleware (mis. BodySizeError 413 dari bodyLimit):
+  // kembalikan status aslinya — ini error sisi klien, aman untuk diekspos.
+  const status = (err as { status?: number }).status;
+  if (typeof status === 'number' && status >= 400 && status < 500) {
+    const message = err.message || (status === 413 ? 'Payload too large' : 'Error');
+    return c.json({ error: message }, status as 400);
+  }
   console.error(`[error] ${c.req.method} ${c.req.path}:`, err);
   if (IS_PROD) {
     return c.json({ error: 'Terjadi kesalahan pada server. Silakan coba lagi.' }, 500);
@@ -87,6 +95,14 @@ if (process.env.NODE_ENV !== 'test') {
     return apiRateLimit(c, next);
   });
 }
+
+// Batasi ukuran body JSON API (1MB) agar tidak bisa disetel payload raksasa.
+// Upload dikecualikan: butuh body besar dan punya parser multipart sendiri + limit di nginx.
+const jsonBodyLimit = bodyLimit({ maxSize: 1024 * 1024 });
+app.use('/api/v1/*', (c, next) => {
+  if (c.req.path.startsWith('/api/v1/upload')) return next();
+  return jsonBodyLimit(c, next);
+});
 
 // Swagger Documentation — hanya di luar produksi (jangan bocorkan dokumentasi API publik)
 if (!IS_PROD) {
