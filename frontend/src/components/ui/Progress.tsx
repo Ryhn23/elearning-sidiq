@@ -1,0 +1,25 @@
+import { cn } from '@/lib/utils';
+
+interface ProgressProps {
+  value: number; // 0-100
+  className?: string;
+  size?: 'sm' | 'md';
+}
+
+export function Progress({ value, className, size = 'md' }: ProgressProps) {
+  const clamped = Math.min(100, Math.max(0, value));
+  return (
+    <div
+      role="progressbar"
+      aria-valuenow={clamped}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      className={cn('w-full overflow-hidden rounded-full bg-muted', size === 'sm' ? 'h-1.5' : 'h-2.5', className)}
+    >
+      <div
+        className="h-full rounded-full bg-primary-600 transition-all duration-300"
+        style={{ width: `${clamped}%` }}
+      />
+    </div>
+  );
+}

@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Secrets & local config — JANGAN pernah commit
+.env
+.env.*
+!.env.example
+
+# File upload (data runtime) & backup lokal
+backend/uploads/
+backups/
+
+# Logs & OS
+*.log
+.DS_Store
