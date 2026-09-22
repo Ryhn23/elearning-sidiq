@@ -48,6 +48,13 @@ app.onError((err, c) => {
 
 app.notFound((c) => c.json({ error: 'Not Found' }, 404));
 
+// Header keamanan dasar di semua respons (dev server tidak punya nginx).
+// CSP/Permissions-Policy lengkap ada di nginx.conf (batas produksi).
+app.use('*', (c, next) => {
+  c.header('X-Content-Type-Options', 'nosniff');
+  return next();
+});
+
 // CORS: hanya origin frontend yang diizinkan (bukan wildcard).
 const FRONTEND_ORIGIN = process.env.APP_URL || 'http://localhost:5174';
 function isAllowedOrigin(origin: string): boolean {
