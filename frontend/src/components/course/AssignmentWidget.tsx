@@ -3,6 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { CalendarClock, CheckCircle2, Clock, FileUp, Paperclip, UploadCloud } from 'lucide-react';
 import { api } from '@/lib/api';
 import { queryClient } from '@/lib/queryClient';
+import { sanitizeHtml } from '@/lib/sanitize';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -104,7 +105,7 @@ export default function AssignmentWidget({ lesson, assignment }: { lesson: any; 
         <Card className="p-5">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Instruksi Tugas</h2>
           <div className="text-sm leading-relaxed text-foreground [&_h2]:text-base [&_h2]:font-semibold [&_li]:ml-4 [&_li]:list-disc [&_ul]:space-y-1">
-            <div dangerouslySetInnerHTML={{ __html: instructions }} />
+            <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(instructions) }} />
           </div>
         </Card>
       )}

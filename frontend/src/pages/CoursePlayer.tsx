@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { queryClient } from '@/lib/queryClient';
+import { sanitizeHtml } from '@/lib/sanitize';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -369,7 +370,7 @@ function LessonContent({ lesson, savedPositionSec, isCompleted, onMarkComplete }
         <h1 className="mb-4 text-xl font-bold text-foreground">{lesson.title}</h1>
         {/* Konten dari pengajar (dipercaya sebagai HTML) */}
         <div className="space-y-3 text-sm leading-relaxed text-foreground [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-foreground [&_li]:ml-4 [&_li]:list-disc [&_ul]:space-y-1">
-          <div dangerouslySetInnerHTML={{ __html: content.textContent }} />
+          <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.textContent) }} />
         </div>
       </Card>
     );
@@ -440,7 +441,7 @@ function LessonContent({ lesson, savedPositionSec, isCompleted, onMarkComplete }
         ) : content?.assignmentInstructions ? (
           <Card className="p-6">
             <div className="space-y-3 text-sm leading-relaxed text-foreground [&_li]:ml-4 [&_li]:list-disc [&_ul]:space-y-1">
-              <div dangerouslySetInnerHTML={{ __html: content.assignmentInstructions }} />
+              <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(content.assignmentInstructions) }} />
             </div>
           </Card>
         ) : null}

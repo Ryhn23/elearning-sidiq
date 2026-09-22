@@ -79,6 +79,7 @@ function AppRoutes() {
       <main>
         <Routes>
               {/* Public */}
+              <Route path="/" element={<LandingGate />} />
               <Route path="/login" element={<LoginGate />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />

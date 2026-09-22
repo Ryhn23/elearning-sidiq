@@ -14,6 +14,7 @@ import {
   Edit3,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 interface RichTextEditorProps {
   label?: string;
@@ -243,7 +244,7 @@ export function RichTextEditor({
             className="prose prose-sm dark:prose-invert min-h-[160px] max-w-none p-4 text-foreground leading-relaxed overflow-x-auto"
             dangerouslySetInnerHTML={{
               __html:
-                value.trim() ||
+                sanitizeHtml(value) ||
                 '<p class="italic text-muted-foreground">Belum ada konten untuk dipratinjau.</p>',
             }}
           />
