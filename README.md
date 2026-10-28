@@ -17,12 +17,12 @@ Platform e-learning full-stack: kursus berbasis video/dokumen, kuis, tugas (assi
 ## Struktur Proyek
 
 ```
-├── docs/            # Dokumentasi lengkap (01–13): arsitektur, skema DB, API, fase implementasi
+├── implementation-plans/  # Dokumentasi lengkap (00–13): arsitektur, skema DB, API, fase implementasi
 ├── backend/         # Hono API — src/routes/*, services/*, db/schema.ts (24 tabel)
 └── frontend/        # React SPA — src/pages/*, components/*, store/, hooks/
 ```
 
-Mulai dari [`docs/01-overview.md`](docs/01-overview.md), lalu baca `02`–`07` untuk detail desain. Status implementasi per fase ada di [`docs/00-INDEX.md`](docs/00-INDEX.md). Kesiapan produksi: [`docs/13-production.md`](docs/13-production.md).
+Mulai dari [`implementation-plans/01-overview.md`](implementation-plans/01-overview.md), lalu baca `02`–`07` untuk detail desain. Status implementasi per fase ada di [`implementation-plans/00-INDEX.md`](implementation-plans/00-INDEX.md). Kesiapan produksi: [`implementation-plans/13-production.md`](implementation-plans/13-production.md).
 
 ## Quick Start (Docker)
 
@@ -56,7 +56,7 @@ Akses:
 
 ## Production Deployment
 
-Checklist lengkap (secrets, TLS, backup, monitoring, baseline performa) ada di [`docs/13-production.md`](docs/13-production.md). Ringkas:
+Checklist lengkap (secrets, TLS, backup, monitoring, baseline performa) ada di [`implementation-plans/13-production.md`](implementation-plans/13-production.md). Ringkas:
 
 ```bash
 # Backup database harian (retensi 7 hari)
@@ -111,3 +111,13 @@ npm run dev
 ## Konfigurasi
 
 Semua variabel environment terdokumentasi di [`backend/.env.example`](backend/.env.example). Fitur opsional: SMTP (email nyata), Google OAuth, Redis.
+
+## Status Implementasi
+
+Status diperbarui setiap kali fase implementasi ditutup.
+
+- [x] **Fase 1** — Core Foundation (Minggu 1–2) ✅ **SELESAI**: skema DB 24 tabel, CRUD API kursus/section/lesson/enrollment, seed data, UI dasar. QA fase ini: backend 97/97 test + typecheck bersih, frontend 22/22 test + typecheck bersih.
+- [x] **Fase 2** — Media & Assessment (Minggu 3–4) ✅ **SELESAI**: upload via disk lokal + busboy streaming (deviasi MinIO sudah diakomodasi), VideoPlayer custom + resume + auto-complete 80%, quiz engine, assignment, email (welcome/enrollment/graded/quiz/certificate). QA fase ini lolos: backend 97/97 test, frontend 22/22 test.
+- [x] **Fase 3** — Student Experience & Admin (Minggu 5–6) ✅ **SELESAI**: diskusi, pengumuman, notifikasi, sertifikat (auto-generate via progress + manual), grade/gradebook/CSV export, user mgmt, admin panel. QA fase ini lolos: backend 97/97 test, frontend 22/22 test. (QA admin tambahan: user management/analytics/category via `admin-management.test.ts` — 21 test lolos, backend → 97/97.)
+- [x] **Fase 4** — Auth Lanjut, Analytics & Polish (Minggu 7–8) ✅ **SELESAI**: refresh token rotation, Google OAuth bind/login, forgot/reset password, analytics overview + KPI admin, rate limiting, sanitasi, TanStack Query, lazy load, security hardening. QA fase ini lolos: backend 97/97 test, frontend 22/22 test.
+- [x] **Production Readiness** — [`implementation-plans/13-production.md`](implementation-plans/13-production.md) ✅ **TERAPILKAN**: CSP/nginx security headers, rate limit, sanitasi, env fail-fast, graceful shutdown, `/ready` healthcheck, backup & load test (commit hardening `0e7e52a`). Verifikasi akhir (titik 2): backend build produksi ✅ + backend QA 97/97 ✅ + frontend build ✅ + frontend QA 22/22 ✅ + Docker Compose config ✅.

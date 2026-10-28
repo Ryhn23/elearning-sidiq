@@ -1,32 +1,66 @@
-# React + TypeScript + Vite
+# Frontend — E-Learning Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React 19 + TypeScript + Vite + Tailwind CSS v4 + TanStack Query + Zustand + React Router v7.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Framework:** React 19 + TypeScript (strict)
+- **Build:** Vite 8 + `@vitejs/plugin-react` (Oxc)
+- **Styling:** Tailwind CSS v4 (`@tailwindcss/postcss`)
+- **Server state:** TanStack Query v5 (`@tanstack/react-query`)
+- **Client state:** Zustand (`src/store/authStore.ts`)
+- **Routing:** React Router v7 — lazy loading + guard (`RequireAuth`, `RequireRole`, `RoleDashboard`)
+- **HTTP:** Axios (`src/lib/api.ts`) — interceptor auto-refresh JWT (single-flight)
+- **UI kit:** Komponen custom sendiri di `src/components/ui/*` (Button, Card, Input, Textarea, Select, Badge, Pagination, Progress, Skeleton, Toast, RichTextEditor)
+- **Icons:** lucide-react
+- **Date:** dayjs
+- **Sanitasi HTML:** dompurify
 
-## React Compiler
+Catatan: tidak memakai React Compiler / SWC / dnd-kit / recharts / TipTap / react-player — player video & editor kuis/rich text dikembangkan custom.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Scripts
 
-## Expanding the Oxlint configuration
+- `npm run dev` — dev server (Vite)
+- `npm run build` — `tsc -b && vite build`
+- `npm run preview` — preview build
+- `npm run lint` — oxlint
+- `npm run test` — vitest
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## Struktur
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```
+src/
+├── main.tsx
+├── App.tsx            # router + lazy loading + providers (QueryClient, Toast)
+├── index.css          # Tailwind v4
+├── pages/             # halaman: Landing, Login, Register, Forgot/Reset, GoogleCallback,
+│                     #        CourseCatalog, CourseDetail, CoursePlayer, student/*,
+│                     #        teacher/*, admin/*, VerifyCertificate, Profile, NotFound, unauth
+├── components/
+│   ├── ui/            # design system (Button, Card, Input, ... RichTextEditor, Toast)
+│   ├── course/        # QuizWidget, VideoPlayer, AssignmentWidget, DiscussionPanel, AnnouncementPanel
+│   ├── course/editor/# CurriculumBuilder, LessonEditorPanel, QuizBuilder, FileUploader
+│   ├── layout/        # AppShell, Sidebar, TopNav, NotificationBell, Footer
+│   └── auth/          # RequireAuth, RequireRole, RoleDashboard
+├── lib/               # api (axios+refresh), sanitize, utils, queryClient
+├── store/             # authStore (Zustand)
+├── hooks/             # useSession
+└── types/             # tipe API
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Environment
+
+- API base URL: `/api/v1` (di-proxy lewat nginx ke backend).
+- Tidak ada `.env` frontend yang di-commit; konfigurasi kredensial ada di `backend/.env`.
+
+## QA
+
+- Test: **22/22 passed** (vitest, Testing Library + jsdom)
+- Typecheck: `tsc -b` — bersih
+- Lint: oxlint
+
+## Dokumentasi Terkait
+
+- Root project: [`../README.md`](../README.md)
+- Backend & API: [`../backend/`](../backend/) (tanpa README terpisah — diatur di root README)
+- Rencana implementasi: [`../implementation-plans/`](../implementation-plans/)
