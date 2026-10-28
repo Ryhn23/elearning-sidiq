@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { BookOpen, Star, ClipboardList, GraduationCap, ArrowRight, PlusCircle, Pencil } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { BookOpen, Star, GraduationCap, ArrowRight, PlusCircle, Pencil } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -14,12 +14,6 @@ interface MyCourseRow {
 }
 
 export default function TeacherDashboard() {
-  const stats = [
-    { label: 'Kursus Dibuat', value: '—', icon: <BookOpen className="h-5 w-5" /> },
-    { label: 'Total Peserta', value: '—', icon: <Star className="h-5 w-5" /> },
-    { label: 'Rating Rata-rata', value: '—', icon: <ClipboardList className="h-5 w-5" /> },
-  ];
-
   const { data: myCourses, isLoading } = useQuery({
     queryKey: ['my-courses'],
     queryFn: async () => {
@@ -29,6 +23,30 @@ export default function TeacherDashboard() {
   });
 
   const courses = myCourses ?? [];
+
+  const statsQuery = useQuery({
+    queryKey: ['teacher-course-stats'],
+    queryFn: async () => {
+      const results = await Promise.all(
+        courses.map(async (c) => {
+          const res = await api.get<{ totalEnrolled: number; rating: { averageRating: number; totalReviews: number } }>(`/analytics/courses/${c.id}`);
+          return res.data;
+        }),
+      );
+      return results;
+    },
+    enabled: courses.length > 0,
+  });
+
+  const courseStats = statsQuery.data ?? [];
+  const totalEnrolled = courseStats.reduce((s, c) => s + (c.totalEnrolled ?? 0), 0);
+  const avgRating = courseStats.length > 0 ? courseStats.reduce((s, c) => s + (c.rating?.averageRating ?? 0), 0) / courseStats.length : 0;
+
+  const stats = [
+    { label: 'Kursus Saya', value: courses.length, icon: <BookOpen className="h-5 w-5" />, color: 'text-primary-600 bg-primary-50' },
+    { label: 'Total Peserta', value: totalEnrolled, icon: <GraduationCap className="h-5 w-5" />, color: 'text-purple-600 bg-purple-50' },
+    { label: 'Rata-rata Rating', value: courseStats.length > 0 ? avgRating.toFixed(1) : '0', icon: <Star className="h-5 w-5" />, color: 'text-amber-600 bg-amber-50' },
+  ];
 
   return (
     <div className="space-y-6">
@@ -43,19 +61,31 @@ export default function TeacherDashboard() {
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-        {stats.map((s) => (
-          <Card key={s.label} className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary-50 text-primary-600">
-                {s.icon}
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 animate-pulse rounded-md bg-muted" />
+                <div className="space-y-2">
+                  <div className="h-7 w-16 animate-pulse rounded bg-muted" />
+                  <div className="h-3 w-24 animate-pulse rounded bg-muted" />
+                </div>
               </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">{s.value}</p>
-                <p className="text-xs text-muted-foreground">{s.label}</p>
+            </Card>
+          ))
+        ) : (
+          stats.map((s) => (
+            <Card key={s.label} className="p-4">
+              <div className="flex items-center gap-3">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-md ${s.color}`}>{s.icon}</div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{s.value}</p>
+                  <p className="text-xs text-muted-foreground">{s.label}</p>
+                </div>
               </div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          ))
+        )}
       </div>
 
       <Card>

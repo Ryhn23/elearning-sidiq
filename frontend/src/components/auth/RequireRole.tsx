@@ -11,7 +11,8 @@ export function RequireRole({ role, children }: RequireRoleProps) {
   const user = useAuthStore((s) => s.user);
 
   if (!user || user.role !== role) {
-    return <Navigate to={`/${user?.role ?? 'student'}/dashboard`} replace />;
+    // Path dashboard per role: /teacher, /admin, /student (bukan /{role}/dashboard)
+    return <Navigate to={`/${user?.role ?? 'student'}`} replace />;
   }
   return <>{children}</>;
 }

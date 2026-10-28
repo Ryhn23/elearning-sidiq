@@ -21,6 +21,14 @@ export default function StudentDashboard() {
     },
   });
 
+  const { data: certificates } = useQuery({
+    queryKey: ['my-certificates'],
+    queryFn: async () => {
+      const res = await api.get<{ certificates: unknown[] }>('/certificates/my');
+      return res.data.certificates;
+    },
+  });
+
   const list = enrollments ?? [];
   const inProgress = list.filter((e) => e.status === 'active');
   const completed = list.filter((e) => e.status === 'completed');
@@ -29,7 +37,7 @@ export default function StudentDashboard() {
     { label: 'Kursus Diikuti', value: list.length, icon: <BookOpen className="h-5 w-5" />, color: 'text-primary-600 bg-primary-50' },
     { label: 'Sedang Dikerjakan', value: inProgress.length, icon: <Clock className="h-5 w-5" />, color: 'text-yellow-600 bg-yellow-50' },
     { label: 'Selesai', value: completed.length, icon: <CheckCircle2 className="h-5 w-5" />, color: 'text-green-600 bg-green-50' },
-    { label: 'Sertifikat', value: completed.length, icon: <Award className="h-5 w-5" />, color: 'text-purple-600 bg-purple-50' },
+    { label: 'Sertifikat', value: certificates?.length ?? completed.length, icon: <Award className="h-5 w-5" />, color: 'text-purple-600 bg-purple-50' },
   ];
 
   return (

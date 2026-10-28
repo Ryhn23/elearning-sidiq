@@ -37,5 +37,7 @@ export default defineConfig({
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
     },
+    // E2E Playwright specs tidak termasuk unit test vitest
+    exclude: ['**/e2e/**', '**/node_modules/**', '**/dist/**'],
   },
 })

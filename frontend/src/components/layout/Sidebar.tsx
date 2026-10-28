@@ -35,6 +35,7 @@ function navItemsForRole(role: string): NavItem[] {
     case 'teacher':
       return [
         { to: '/teacher', label: 'Dashboard', icon: <LayoutDashboard className="h-4 w-4" />, end: true },
+        { to: '/teacher/courses', label: 'Kursus Saya', icon: <BookOpen className="h-4 w-4" /> },
         { to: '/teacher/courses/new', label: 'Buat Kursus', icon: <PlusCircle className="h-4 w-4" /> },
         { to: '/courses', label: 'Katalog Kursus', icon: <BookOpen className="h-4 w-4" /> },
       ];
