@@ -30,6 +30,8 @@ interface CourseDetail {
   requirements?: string[];
   tags?: string[];
   certificateEnabled?: boolean;
+  sidiqPelajaranId?: string | null;
+  sidiqKelasId?: string | null;
   sections?: { id: string; title: string; lessons: unknown[] }[];
 }
 
@@ -106,6 +108,7 @@ function BasicInfoStep({ isNew, courseId, onCreated }: { isNew: boolean; courseI
   const [shortDescription, setShortDescription] = useState('');
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState<string>('');
+  const [sidiqPelajaranId, setSidiqPelajaranId] = useState<string>('');
   const [level, setLevel] = useState('all_levels');
   const [price, setPrice] = useState('0');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
@@ -124,6 +127,7 @@ function BasicInfoStep({ isNew, courseId, onCreated }: { isNew: boolean; courseI
       setShortDescription(course.shortDescription ?? '');
       setDescription(course.description ?? '');
       setCategoryId(course.categoryId ?? '');
+      setSidiqPelajaranId(course.sidiqPelajaranId ?? '');
       setLevel(course.level ?? 'all_levels');
       setPrice(String(course.price ?? 0));
       setThumbnailUrl(course.thumbnailUrl ?? '');
@@ -133,6 +137,19 @@ function BasicInfoStep({ isNew, courseId, onCreated }: { isNew: boolean; courseI
 
   const { data: categories } = useQuery({ queryKey: ['categories'], queryFn: async () => (await api.get('/categories')).data as { id: string; name: string }[] });
 
+  const { data: sidiqMapel } = useQuery({
+    queryKey: ['sidiq-pelajaran'],
+    queryFn: async () => {
+      try {
+        const res = await api.get('/integrations/sidiq/sync/pelajaran');
+        return (res.data?.data ?? []) as { id: string; nama_pelajaran: string; kode_pelajaran?: string; kategori?: string }[];
+      } catch {
+        return [];
+      }
+    },
+    staleTime: 5 * 60_000,
+  });
+
   const saveMutation = useMutation({
     mutationFn: async () => {
       const body = {
@@ -140,6 +157,7 @@ function BasicInfoStep({ isNew, courseId, onCreated }: { isNew: boolean; courseI
         shortDescription: shortDescription.trim() || undefined,
         description: description || undefined,
         categoryId: categoryId || null,
+        sidiqPelajaranId: sidiqPelajaranId || null,
         level,
         price: Number(price),
         thumbnailUrl: thumbnailUrl || '',
@@ -183,6 +201,25 @@ function BasicInfoStep({ isNew, courseId, onCreated }: { isNew: boolean; courseI
             </Select>
             <Input label="Harga (Rp)" type="number" min={0} value={price} onChange={(e) => setPrice(e.target.value)} hint="0 = gratis" />
           </div>
+        </div>
+
+        <div className="rounded-lg border border-primary-500/20 bg-primary-50/40 p-3.5 dark:bg-primary-950/20">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-primary-700 dark:text-primary-300">
+            Terkoneksi SIDIQ ERP (Sinkronisasi Nilai Otomatis)
+          </p>
+          <Select
+            label="Mata Pelajaran SIDIQ"
+            value={sidiqPelajaranId}
+            onChange={(e) => setSidiqPelajaranId(e.target.value)}
+            hint="Jika dipilih, seluruh nilai kuis, tugas, dan sertifikat santri di kursus ini akan otomatis masuk ke database SIDIQ."
+          >
+            <option value="">— Standalone LMS (Tidak Terkoneksi ke SIDIQ) —</option>
+            {(sidiqMapel ?? []).map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.nama_pelajaran} {m.kode_pelajaran ? `(${m.kode_pelajaran})` : ''} {m.kategori ? `— ${m.kategori}` : ''}
+              </option>
+            ))}
+          </Select>
         </div>
 
         <div>

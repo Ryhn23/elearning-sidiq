@@ -382,6 +382,11 @@ assignmentRoutes.openapi(gradeSubmissionRoute, async (c) => {
     gradedAt: new Date(),
   }).where(eq(assignmentSubmissions.id, submissionId)).returning();
 
+  // Recalculate course grade and trigger sync to SIDIQ
+  void recalculateProgress(submission.userId, ctx.course.id).catch(
+    (e) => console.error('[assignment] recalculate error:', e)
+  );
+
   // Email notifikasi ke student (fire-and-forget)
   const [student] = await db.select().from(users).where(eq(users.id, submission.userId)).limit(1);
   if (student) {

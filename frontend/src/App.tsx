@@ -33,6 +33,7 @@ const AdminAnalytics = lazy(() => import('@/pages/admin/Analytics'));
 const TeacherStudents = lazy(() => import('@/pages/teacher/Students'));
 const StudentCertificates = lazy(() => import('@/pages/student/Certificates'));
 const VerifyCertificate = lazy(() => import('@/pages/VerifyCertificate'));
+const SsoLaunch = lazy(() => import('@/pages/SsoLaunch'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 const StudentLayout = lazy(() => import('@/layouts/StudentLayout'));
@@ -85,6 +86,7 @@ function AppRoutes() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/auth/google/callback" element={<GoogleCallback />} />
+              <Route path="/sso/launch" element={<SsoLaunch />} />
               <Route path="/courses" element={<CourseCatalog />} />
               <Route path="/courses/:slug" element={<CourseDetail />} />
               <Route path="/verify/:code" element={<VerifyCertificate />} />

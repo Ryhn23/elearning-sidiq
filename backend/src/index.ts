@@ -3,6 +3,7 @@ import 'dotenv/config';
 import { app } from './app';
 import { ensureUploadDirs } from './services/storage';
 import { closeDb } from './db';
+import { processSyncQueue } from './services/sidiqClient';
 
 /**
  * Validasi environment fail-fast: server produksi tidak boleh start dengan
@@ -43,6 +44,14 @@ function validateEnv(): void {
 validateEnv();
 ensureUploadDirs();
 
+// Background outbox processor untuk sinkronisasi antrean ke SIDIQ (setiap 60s)
+const syncInterval = setInterval(() => {
+  processSyncQueue().catch((err) => {
+    console.error('[sidiqSync] Scheduled sync error:', err);
+  });
+}, 60_000);
+syncInterval.unref();
+
 const port = Number(process.env.PORT) || 3000;
 const server = serve(
   {
@@ -69,6 +78,7 @@ let shuttingDown = false;
 async function shutdown(signal: string): Promise<void> {
   if (shuttingDown) return;
   shuttingDown = true;
+  clearInterval(syncInterval);
   console.log(`[server] ${signal} diterima — graceful shutdown...`);
   const forceTimer = setTimeout(() => {
     console.error('[server] Shutdown paksa (timeout 10s)');

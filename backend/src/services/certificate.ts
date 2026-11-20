@@ -6,6 +6,7 @@ import QRCode from 'qrcode';
 import { db } from '../db';
 import { certificates, courses, users } from '../db/schema';
 import { eq, and } from 'drizzle-orm';
+import { enqueueCertificateSync } from './sidiqClient';
 
 const CERT_DIR = path.resolve(process.cwd(), 'uploads/certificates');
 
@@ -155,6 +156,17 @@ export async function generateCertificate(userId: string, courseId: string) {
     pdfUrl,
     issuedAt: new Date(),
   }).returning();
+
+  if (user.sidiqEntityId) {
+    void enqueueCertificateSync({
+      santriId: user.sidiqEntityId,
+      courseId,
+      courseTitle: course.title,
+      certificateCode: code,
+      pdfUrl: `${process.env.PUBLIC_URL || 'http://localhost:5174'}${pdfUrl}`,
+      issuedAt: new Date().toISOString(),
+    }).catch((e) => console.error('[sidiqSync] cert sync error:', e));
+  }
 
   return row;
 }

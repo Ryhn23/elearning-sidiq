@@ -620,8 +620,9 @@ quizRoutes.openapi(submitAttemptRoute, async (c) => {
       target: [lessonProgress.userId, lessonProgress.lessonId],
       set: { isCompleted: true, completedAt: new Date(), lastAccessAt: new Date() },
     });
-    await recalculateProgress(payload.id, ctx.course.id);
   }
+  // Selalu hitung ulang progress & nilai kuis dan sinkronkan ke SIDIQ
+  await recalculateProgress(payload.id, ctx.course.id);
 
   // Email hasil quiz (hanya jika submitter adalah pemilik attempt)
   if (attempt.userId === payload.id) {

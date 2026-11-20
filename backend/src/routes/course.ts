@@ -253,6 +253,8 @@ const CourseCreateSchema = z.object({
   requirements: z.array(z.string()).default([]),
   tags: z.array(z.string()).default([]),
   certificateEnabled: z.boolean().default(false),
+  sidiqPelajaranId: z.string().nullable().optional(),
+  sidiqKelasId: z.string().nullable().optional(),
 });
 
 const createCourseRoute = createRoute({
@@ -307,6 +309,8 @@ courseRoutes.openapi(createCourseRoute, async (c) => {
     requirements: body.requirements,
     tags: body.tags,
     certificateEnabled: body.certificateEnabled,
+    sidiqPelajaranId: body.sidiqPelajaranId ?? null,
+    sidiqKelasId: body.sidiqKelasId ?? null,
   }).returning();
 
   return c.json(row as any, 201);
@@ -632,6 +636,8 @@ const CourseUpdateSchema = z.object({
   requirements: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
   certificateEnabled: z.boolean().optional(),
+  sidiqPelajaranId: z.string().nullable().optional(),
+  sidiqKelasId: z.string().nullable().optional(),
 });
 
 const updateCourseRoute = createRoute({

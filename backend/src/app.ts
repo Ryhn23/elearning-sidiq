@@ -23,6 +23,7 @@ import announcementRoutes from './routes/announcement';
 import notificationRoutes from './routes/notification';
 import userRoutes from './routes/user';
 import analyticsRoutes from './routes/analytics';
+import sidiqIntegrationRoutes from './routes/sidiqIntegration';
 import { ensureUploadDirs, UPLOAD_DIR } from './services/storage';
 import { rateLimit } from './middleware/rateLimit';
 import { checkDatabase } from './db';
@@ -140,6 +141,7 @@ app.route('/api/v1/announcements', announcementRoutes);
 app.route('/api/v1/notifications', notificationRoutes);
 app.route('/api/v1/users', userRoutes);
 app.route('/api/v1/analytics', analyticsRoutes);
+app.route('/api/v1/integrations/sidiq', sidiqIntegrationRoutes);
 
 // Static file server untuk /uploads/* dengan dukungan Range (streaming video)
 const MIME: Record<string, string> = {

@@ -27,6 +27,10 @@ export const users = pgTable('users', {
   avatarUrl:    text('avatar_url'),
   bio:          text('bio'),
   phone:        varchar('phone', { length: 20 }),
+  sidiqUserId:   varchar('sidiq_user_id', { length: 100 }).unique(),
+  sidiqEntityId: varchar('sidiq_entity_id', { length: 100 }),
+  sidiqRole:     varchar('sidiq_role', { length: 50 }),
+  nisNip:        varchar('nis_nip', { length: 50 }),
   isActive:     boolean('is_active').default(true).notNull(),
   lastLoginAt:  timestamp('last_login_at'),
   createdAt:    timestamp('created_at').defaultNow(),
@@ -59,6 +63,8 @@ export const courses = pgTable('courses', {
   previewVideoUrl:    text('preview_video_url'),
   instructorId:       uuid('instructor_id').notNull().references(() => users.id),
   categoryId:         uuid('category_id').references(() => categories.id),
+  sidiqPelajaranId:   varchar('sidiq_pelajaran_id', { length: 100 }),
+  sidiqKelasId:       varchar('sidiq_kelas_id', { length: 100 }),
   level:              courseLevelEnum('level').default('all_levels'),
   status:             courseStatusEnum('status').default('draft').notNull(),
   language:           varchar('language', { length: 10 }).default('id'),
@@ -396,3 +402,19 @@ export const passwordResetTokens = pgTable('password_reset_tokens', {
   usedAt:    timestamp('used_at'),
   createdAt: timestamp('created_at').defaultNow(),
 });
+
+// ============================================================
+// TABEL 26: sidiq_sync_queue (Outbox queue untuk sinkronisasi ke SIDIQ)
+// ============================================================
+export const sidiqSyncQueue = pgTable('sidiq_sync_queue', {
+  id:         uuid('id').defaultRandom().primaryKey(),
+  eventType:  varchar('event_type', { length: 50 }).notNull(),
+  eventId:    varchar('event_id', { length: 100 }).notNull().unique(),
+  payload:    text('payload').notNull(),
+  attempts:   integer('attempts').default(0).notNull(),
+  status:     varchar('status', { length: 20 }).default('pending').notNull(),
+  lastError:  text('last_error'),
+  createdAt:  timestamp('created_at').defaultNow(),
+  updatedAt:  timestamp('updated_at').defaultNow(),
+});
+
