@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table';
 import { useToast } from '@/components/ui/useToast';
 
 interface GradebookRow {
@@ -23,9 +24,9 @@ interface GradebookRow {
 }
 
 function gradeColor(g: number) {
-  if (g >= 80) return 'text-green-600';
-  if (g >= 60) return 'text-yellow-600';
-  return 'text-red-500';
+  if (g >= 80) return 'text-primary font-bold';
+  if (g >= 60) return 'text-amber-600 font-semibold';
+  return 'text-destructive font-semibold';
 }
 
 function getLetterGrade(score: number | null): string {
@@ -102,11 +103,11 @@ export default function Gradebook() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <Link to="/teacher" className="mb-2 inline-flex items-center gap-1 text-sm text-primary-600 hover:underline">
+          <Link to="/teacher" className="mb-2 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
             <ArrowLeft className="h-4 w-4" /> Kembali ke Dashboard
           </Link>
-          <h1 className="text-xl font-bold text-foreground sm:text-2xl">Gradebook</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Rekap nilai dan grade kelulusan seluruh peserta kursus.</p>
+          <h1 className="text-xl font-bold text-foreground sm:text-2xl">Buku Nilai (Gradebook)</h1>
+          <p className="mt-1 text-xs text-muted-foreground">Rekap nilai dan grade kelulusan seluruh santri / siswa pada kursus ini.</p>
         </div>
 
         {rows.length > 0 && (
@@ -126,18 +127,18 @@ export default function Gradebook() {
       {rows.length > 0 && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1 sm:max-w-xs">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari siswa atau email..."
-              className="w-full rounded-md border border-border bg-background py-2 pl-9 pr-3 text-sm text-foreground outline-none focus:border-primary-500"
+              className="w-full rounded-xl border border-border bg-background py-2 pl-10 pr-3 text-xs text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
-            className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary-500"
+            className="rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary transition-colors"
           >
             <option value="all">Semua Status Kelulusan</option>
             <option value="passed">Lulus (Nilai ≥ 60)</option>
@@ -147,79 +148,79 @@ export default function Gradebook() {
       )}
 
       {rows.length === 0 ? (
-        <Card className="flex flex-col items-center p-10 text-center">
-          <GraduationCap className="mb-3 h-10 w-10 text-muted-foreground/50" />
-          <p className="text-sm font-medium text-foreground">Belum ada peserta</p>
-          <p className="mt-1 text-sm text-muted-foreground">Nilai akan muncul setelah ada student yang enrolled.</p>
+        <Card className="flex flex-col items-center p-12 text-center rounded-2xl">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground mb-4">
+            <GraduationCap className="h-7 w-7" />
+          </div>
+          <p className="text-base font-semibold text-foreground">Belum ada peserta</p>
+          <p className="mt-1 text-xs text-muted-foreground">Nilai akan otomatis muncul setelah ada siswa yang menyelesaikan kuis atau tugas.</p>
         </Card>
       ) : (
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>
-              {filteredRows.length} dari {rows.length} Peserta
+        <Card className="rounded-xl overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between py-4 px-6 border-b border-border">
+            <CardTitle className="text-sm font-semibold">
+              {filteredRows.length} dari {rows.length} Peserta Terdaftar
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="-mx-4 overflow-x-auto sm:-mx-6">
-              <table className="w-full min-w-[760px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
-                    <th className="px-4 py-2 font-medium sm:px-6">Student</th>
-                    <th className="px-3 py-2 font-medium">Progress</th>
-                    <th className="px-3 py-2 font-medium">Kuis (%)</th>
-                    <th className="px-3 py-2 font-medium">Tugas</th>
-                    <th className="px-4 py-2 font-medium sm:px-6">Nilai Akhir</th>
-                    <th className="px-4 py-2 text-center font-medium">Grade</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filteredRows.map((r) => (
-                    <tr key={r.userId} className="hover:bg-muted/30">
-                      <td className="px-4 py-3 sm:px-6">
-                        <p className="font-medium text-foreground">{r.name}</p>
-                        <p className="text-xs text-muted-foreground">{r.email}</p>
-                      </td>
-                      <td className="px-3 py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
-                            <div className="h-full rounded-full bg-primary-500" style={{ width: `${Math.round(r.progress)}%` }} />
-                          </div>
-                          <span className="text-xs text-muted-foreground">{Math.round(r.progress)}%</span>
+          <CardContent className="p-0">
+            <Table className="border-0 rounded-none">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Siswa</TableHead>
+                  <TableHead>Progress</TableHead>
+                  <TableHead>Kuis (%)</TableHead>
+                  <TableHead>Tugas</TableHead>
+                  <TableHead>Nilai Akhir</TableHead>
+                  <TableHead className="text-center">Grade</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredRows.map((r) => (
+                  <TableRow key={r.userId}>
+                    <TableCell>
+                      <p className="font-semibold text-foreground">{r.name}</p>
+                      <p className="text-xs text-muted-foreground">{r.email}</p>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-20 overflow-hidden rounded-full bg-muted">
+                          <div className="h-full rounded-full bg-primary" style={{ width: `${Math.round(r.progress)}%` }} />
                         </div>
-                      </td>
-                      <td className="px-3 py-3">
-                        {r.quizAvg !== null ? (
-                          <span className={`font-semibold ${gradeColor(r.quizAvg)}`}>{r.quizAvg}%</span>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">— ({r.quizCount} kuis)</span>
-                        )}
-                      </td>
-                      <td className="px-3 py-3">
-                        {r.assignmentAvg !== null ? (
-                          <span className={`font-semibold ${gradeColor(r.assignmentAvg)}`}>{r.assignmentAvg}</span>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">— ({r.assignmentCount} tugas)</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 sm:px-6">
-                        {r.finalGrade !== null ? (
-                          <Badge variant={r.finalGrade >= 80 ? 'success' : r.finalGrade >= 60 ? 'warning' : 'destructive'}>
-                            {r.finalGrade}
-                          </Badge>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">Belum ada nilai</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-muted text-xs font-bold text-foreground">
-                          {getLetterGrade(r.finalGrade)}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        <span className="text-xs font-medium tabular-nums text-muted-foreground">{Math.round(r.progress)}%</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {r.quizAvg !== null ? (
+                        <span className={gradeColor(r.quizAvg)}>{r.quizAvg}%</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">— ({r.quizCount} kuis)</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {r.assignmentAvg !== null ? (
+                        <span className={gradeColor(r.assignmentAvg)}>{r.assignmentAvg}</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">— ({r.assignmentCount} tugas)</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {r.finalGrade !== null ? (
+                        <Badge variant={r.finalGrade >= 80 ? 'success' : r.finalGrade >= 60 ? 'warning' : 'destructive'}>
+                          {r.finalGrade}
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Belum ada nilai</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-muted text-xs font-bold text-foreground">
+                        {getLetterGrade(r.finalGrade)}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       )}

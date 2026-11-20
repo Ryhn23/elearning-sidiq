@@ -147,12 +147,12 @@ export default function CourseDetail() {
   const existingUserReview = course.reviews?.find((r) => r.author.id === user?.id);
 
   return (
-    <div className="min-h-screen bg-muted/20">
+    <div className="min-h-screen bg-muted/30">
       {/* Hero */}
       <div className="bg-background border-b border-border">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-          <Link to="/courses" className="text-sm text-primary-600 hover:underline">
-            ← Katalog Kursus
+          <Link to="/courses" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
+            ← Kembali ke Katalog Kursus
           </Link>
           <div className="mt-4 grid gap-8 lg:grid-cols-3">
             <div className="lg:col-span-2">
@@ -245,13 +245,13 @@ export default function CourseDetail() {
 
       {/* Tab bar */}
       <div className="border-b border-border bg-background">
-        <div className="mx-auto flex max-w-7xl gap-1 px-4 sm:px-6">
+        <div className="mx-auto flex max-w-7xl gap-2 px-4 sm:px-6">
           <button
             onClick={() => setTab('curriculum')}
             className={cn(
-              'flex items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors',
+              'flex items-center gap-2 border-b-2 px-4 py-3 text-xs font-semibold transition-all',
               tab === 'curriculum'
-                ? 'border-primary-600 text-primary-700'
+                ? 'border-primary text-primary'
                 : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
           >
@@ -260,9 +260,9 @@ export default function CourseDetail() {
           <button
             onClick={() => setTab('reviews')}
             className={cn(
-              'flex items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors',
+              'flex items-center gap-2 border-b-2 px-4 py-3 text-xs font-semibold transition-all',
               tab === 'reviews'
-                ? 'border-primary-600 text-primary-700'
+                ? 'border-primary text-primary'
                 : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
           >
@@ -273,9 +273,9 @@ export default function CourseDetail() {
               <button
                 onClick={() => setTab('announcements')}
                 className={cn(
-                  'flex items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors',
+                  'flex items-center gap-2 border-b-2 px-4 py-3 text-xs font-semibold transition-all',
                   tab === 'announcements'
-                    ? 'border-primary-600 text-primary-700'
+                    ? 'border-primary text-primary'
                     : 'border-transparent text-muted-foreground hover:text-foreground',
                 )}
               >
@@ -284,9 +284,9 @@ export default function CourseDetail() {
               <button
                 onClick={() => setTab('discussion')}
                 className={cn(
-                  'flex items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors',
+                  'flex items-center gap-2 border-b-2 px-4 py-3 text-xs font-semibold transition-all',
                   tab === 'discussion'
-                    ? 'border-primary-600 text-primary-700'
+                    ? 'border-primary text-primary'
                     : 'border-transparent text-muted-foreground hover:text-foreground',
                 )}
               >

@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { GraduationCap, ShieldCheck, ShieldX, Search } from 'lucide-react';
+import { ShieldCheck, ShieldX, Search, Download } from 'lucide-react';
 import { api } from '@/lib/api';
+import { Button } from '@/components/ui/Button';
+import { Card, CardContent } from '@/components/ui/Card';
 
 interface VerifyResult {
   valid: boolean;
@@ -34,100 +36,118 @@ export default function VerifyCertificate() {
   });
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-muted/30">
       {/* Header */}
-      <header className="border-b border-border">
-        <div className="mx-auto flex h-14 max-w-3xl items-center gap-2 px-4">
-          <GraduationCap className="h-6 w-6 text-primary-600" />
-          <span className="text-base font-bold text-foreground">E-Learning</span>
+      <header className="border-b border-border bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-3xl items-center justify-between px-4">
+          <Link to="/" className="flex items-center gap-2.5">
+            <img src="/logo.png" alt="Sidiq" className="h-8 w-8 object-contain" />
+            <div className="flex flex-col">
+              <span className="text-base font-bold tracking-tight text-foreground leading-tight">
+                Sidiq <span className="text-primary">E-Learning</span>
+              </span>
+              <span className="text-[10px] font-medium text-muted-foreground">Verifikasi Sertifikat Resmi</span>
+            </div>
+          </Link>
+          <Link to="/">
+            <Button size="sm" variant="ghost">Beranda</Button>
+          </Link>
         </div>
       </header>
 
-      <main className="flex flex-1 items-start justify-center px-4 py-10">
+      <main className="flex flex-1 items-start justify-center px-4 py-12">
         <div className="w-full max-w-xl space-y-6">
           <div className="text-center">
-            <h1 className="text-xl font-bold text-foreground sm:text-2xl">Verifikasi Sertifikat</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Masukkan kode sertifikat untuk memverifikasi keasliannya.
+            <h1 className="text-2xl font-bold text-foreground">Verifikasi Sertifikat Digital</h1>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Masukkan kode verifikasi unik sertifikat untuk memastikan keabsahan dokumen.
             </p>
           </div>
 
           {/* Form */}
           <form
-            onSubmit={(e) => { e.preventDefault(); navigate(`/verify/${input.trim().toUpperCase()}`); }}
+            onSubmit={(e) => { e.preventDefault(); if (input.trim()) navigate(`/verify/${input.trim().toUpperCase()}`); }}
             className="flex gap-2"
           >
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="mis. ABC123-XYZ789"
+              placeholder="mis. SIDIQ-CERT-2026-XXXX"
               aria-label="Kode sertifikat"
-              className="h-10 flex-1 rounded-md border border-border bg-background px-3 font-mono text-sm uppercase text-foreground outline-none focus:border-primary-500"
+              className="h-11 flex-1 rounded-xl border border-border bg-background px-4 font-mono text-xs uppercase text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
             />
-            <button type="submit" disabled={!input.trim()}
-              className="inline-flex h-10 items-center gap-1 rounded-md bg-primary-600 px-4 text-sm font-medium text-white hover:bg-primary-700 disabled:cursor-not-allowed disabled:bg-primary-300">
+            <Button type="submit" disabled={!input.trim()} className="gap-1.5 shadow-xs">
               <Search className="h-4 w-4" /> Verifikasi
-            </button>
+            </Button>
           </form>
 
           {/* Result */}
           {isLoading && (
-            <div className="rounded-md border border-border bg-card p-6 text-center text-sm text-muted-foreground">
-              Memverifikasi...
-            </div>
+            <Card className="rounded-2xl p-8 text-center text-xs text-muted-foreground">
+              Memverifikasi data pada blockchain / database sertifikat...
+            </Card>
           )}
 
           {!isLoading && isError && normalizedCode.length >= 6 && (
-            <div className="flex items-start gap-3 rounded-md border border-red-200 bg-red-50 p-4">
-              <ShieldX className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
-              <div>
-                <p className="text-sm font-semibold text-red-700">Sertifikat tidak ditemukan</p>
-                <p className="mt-1 text-xs text-red-600">Periksa kembali kode sertifikat yang Anda masukkan.</p>
+            <Card className="rounded-2xl border-destructive/20 bg-destructive/10 p-6">
+              <div className="flex items-start gap-3">
+                <ShieldX className="mt-0.5 h-6 w-6 shrink-0 text-destructive" />
+                <div>
+                  <p className="text-sm font-bold text-destructive">Sertifikat Tidak Ditemukan</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Kode sertifikat <code className="font-mono font-bold">{normalizedCode}</code> tidak terdaftar dalam basis data SIDIQ E-Learning. Periksa kembali karakter dan format kode.
+                  </p>
+                </div>
               </div>
-            </div>
+            </Card>
           )}
 
           {!isLoading && !isError && data?.valid && (
-            <div className="rounded-md border border-green-200 bg-green-50 p-4">
-              <div className="flex items-start gap-3">
-                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-green-700">Sertifikat Valid</p>
-                  <dl className="mt-3 space-y-2 text-sm">
-                    <div className="flex gap-2">
-                      <dt className="w-24 shrink-0 text-muted-foreground">Nama</dt>
-                      <dd className="font-medium text-foreground">{data.userName}</dd>
-                    </div>
-                    <div className="flex gap-2">
-                      <dt className="w-24 shrink-0 text-muted-foreground">Kursus</dt>
-                      <dd className="font-medium text-foreground">{data.courseTitle}</dd>
-                    </div>
-                    <div className="flex gap-2">
-                      <dt className="w-24 shrink-0 text-muted-foreground">Diterbitkan</dt>
-                      <dd className="text-foreground">{data.issuedAt ? fmtDate(data.issuedAt) : '—'}</dd>
-                    </div>
-                    <div className="flex gap-2">
-                      <dt className="w-24 shrink-0 text-muted-foreground">Kode</dt>
-                      <dd className="font-mono text-xs text-foreground">{data.code}</dd>
-                    </div>
-                  </dl>
+            <Card className="rounded-2xl border-primary/30 bg-card shadow-md overflow-hidden">
+              <div className="bg-primary/10 border-b border-primary/20 p-5 flex items-center gap-3">
+                <ShieldCheck className="h-7 w-7 text-primary shrink-0" />
+                <div>
+                  <p className="text-sm font-bold text-primary">Sertifikat Sah & Terverifikasi</p>
+                  <p className="text-xs text-muted-foreground">Dokumen diterbitkan resmi oleh Sidiq E-Learning.</p>
                 </div>
               </div>
-            </div>
-          )}
 
-          {!isLoading && !isError && data && !data.valid && normalizedCode.length >= 6 && (
-            <div className="flex items-start gap-3 rounded-md border border-red-200 bg-red-50 p-4">
-              <ShieldX className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
-              <p className="text-sm font-semibold text-red-700">Sertifikat tidak valid</p>
-            </div>
+              <CardContent className="p-6 space-y-4">
+                <div className="space-y-3 text-xs">
+                  <div className="flex justify-between py-1.5 border-b border-border/50">
+                    <span className="text-muted-foreground">Nama Peserta:</span>
+                    <span className="font-bold text-foreground text-sm">{data.userName}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-border/50">
+                    <span className="text-muted-foreground">Kursus / Materi:</span>
+                    <span className="font-bold text-foreground text-sm">{data.courseTitle}</span>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-border/50">
+                    <span className="text-muted-foreground">Nomor Seri:</span>
+                    <span className="font-mono font-bold text-foreground">{data.code}</span>
+                  </div>
+                  {data.issuedAt && (
+                    <div className="flex justify-between py-1.5 border-b border-border/50">
+                      <span className="text-muted-foreground">Tanggal Terbit:</span>
+                      <span className="font-medium text-foreground">{fmtDate(data.issuedAt)}</span>
+                    </div>
+                  )}
+                </div>
+
+                {data.pdfUrl && (
+                  <div className="pt-2">
+                    <a href={data.pdfUrl} target="_blank" rel="noreferrer">
+                      <Button className="w-full gap-2 shadow-xs">
+                        <Download className="h-4 w-4" /> Unduh Dokumen Asli (PDF)
+                      </Button>
+                    </a>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           )}
         </div>
       </main>
-
-      <footer className="border-t border-border py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} E-Learning Platform
-      </footer>
     </div>
   );
 }

@@ -43,29 +43,35 @@ export default function TeacherDashboard() {
   const avgRating = courseStats.length > 0 ? courseStats.reduce((s, c) => s + (c.rating?.averageRating ?? 0), 0) / courseStats.length : 0;
 
   const stats = [
-    { label: 'Kursus Saya', value: courses.length, icon: <BookOpen className="h-5 w-5" />, color: 'text-primary-600 bg-primary-50' },
-    { label: 'Total Peserta', value: totalEnrolled, icon: <GraduationCap className="h-5 w-5" />, color: 'text-purple-600 bg-purple-50' },
-    { label: 'Rata-rata Rating', value: courseStats.length > 0 ? avgRating.toFixed(1) : '0', icon: <Star className="h-5 w-5" />, color: 'text-amber-600 bg-amber-50' },
+    { label: 'Kursus Asuhan', value: courses.length, icon: <BookOpen className="h-5 w-5" />, color: 'text-primary bg-primary/10 border-primary/20' },
+    { label: 'Total Santri Terdaftar', value: totalEnrolled, icon: <GraduationCap className="h-5 w-5" />, color: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20' },
+    { label: 'Rata-rata Penilaian', value: courseStats.length > 0 ? avgRating.toFixed(1) : '0', icon: <Star className="h-5 w-5" />, color: 'text-amber-600 bg-amber-500/10 border-amber-500/20' },
   ];
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-foreground sm:text-2xl">Dashboard Pengajar</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Kelola kursus dan peserta Anda.</p>
+      {/* Banner */}
+      <div className="rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="space-y-1">
+            <span className="text-xs font-semibold uppercase tracking-wider text-primary">Portal Asatidz & Pengajar</span>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Dasbor Pembimbing</h1>
+            <p className="text-sm text-muted-foreground">Kelola silabus kursus, pantau kemajuan belajar santri, dan evaluasi buku nilai.</p>
+          </div>
+          <Link to="/teacher/courses/new">
+            <Button className="font-semibold shadow-md">
+              <PlusCircle className="mr-2 h-4 w-4" /> Buat Kursus Baru
+            </Button>
+          </Link>
         </div>
-        <Link to="/teacher/courses/new">
-          <Button size="sm"><PlusCircle className="mr-1 h-4 w-4" /> Buat Kursus</Button>
-        </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
             <Card key={i} className="p-4">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 animate-pulse rounded-md bg-muted" />
+                <div className="h-12 w-12 animate-pulse rounded-xl bg-muted" />
                 <div className="space-y-2">
                   <div className="h-7 w-16 animate-pulse rounded bg-muted" />
                   <div className="h-3 w-24 animate-pulse rounded bg-muted" />
@@ -75,11 +81,11 @@ export default function TeacherDashboard() {
           ))
         ) : (
           stats.map((s) => (
-            <Card key={s.label} className="p-4">
+            <Card key={s.label} className="p-4 border border-border shadow-sm">
               <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-md ${s.color}`}>{s.icon}</div>
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${s.color}`}>{s.icon}</div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{s.value}</p>
+                  <p className="text-2xl font-bold text-foreground leading-tight">{s.value}</p>
                   <p className="text-xs text-muted-foreground">{s.label}</p>
                 </div>
               </div>

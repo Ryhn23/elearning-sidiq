@@ -17,7 +17,7 @@ export function Progress({ value, className, size = 'md' }: ProgressProps) {
       className={cn('w-full overflow-hidden rounded-full bg-muted', size === 'sm' ? 'h-1.5' : 'h-2.5', className)}
     >
       <div
-        className="h-full rounded-full bg-primary-600 transition-all duration-300"
+        className="h-full rounded-full bg-primary transition-all duration-300"
         style={{ width: `${clamped}%` }}
       />
     </div>

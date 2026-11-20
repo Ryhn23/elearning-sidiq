@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, UserCog, ShieldCheck, ShieldX, Plus, Download, Pencil, X } from 'lucide-react';
+import { Search, UserCog, ShieldCheck, ShieldX, Plus, Download, Pencil } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/Dialog';
 import { useToast } from '@/components/ui/useToast';
 
 interface UserRow {
@@ -136,8 +138,8 @@ export default function AdminUsers() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-foreground sm:text-2xl">Manajemen User</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Kelola akun dan otorisasi pengguna platform.</p>
+          <h1 className="text-xl font-bold text-foreground sm:text-2xl">Manajemen Pengguna (User)</h1>
+          <p className="mt-1 text-xs text-muted-foreground">Kelola akun, peran, dan otorisasi pengguna seluruh platform.</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -152,7 +154,7 @@ export default function AdminUsers() {
           </Button>
           <Button
             size="sm"
-            className="gap-1.5"
+            className="gap-1.5 shadow-xs"
             onClick={() => setShowCreateModal(true)}
           >
             <Plus className="h-4 w-4" /> Tambah User
@@ -163,102 +165,110 @@ export default function AdminUsers() {
       {/* Filter */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1 sm:max-w-xs">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Cari nama atau email..."
-            className="w-full rounded-md border border-border bg-background py-2 pl-9 pr-3 text-sm text-foreground outline-none focus:border-primary-500"
+            className="w-full rounded-xl border border-border bg-background py-2 pl-10 pr-3 text-xs text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
           />
         </div>
         <select
           value={role}
           onChange={(e) => { setRole(e.target.value as typeof role); setPage(1); }}
-          className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary-500"
+          className="rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary transition-colors"
         >
           <option value="all">Semua Role</option>
-          <option value="student">Student</option>
-          <option value="teacher">Teacher</option>
-          <option value="admin">Admin</option>
+          <option value="student">Student (Santri / Siswa)</option>
+          <option value="teacher">Teacher (Pengajar)</option>
+          <option value="admin">Administrator</option>
         </select>
       </div>
 
-      <Card>
-        <CardContent>
+      <Card className="rounded-xl overflow-hidden">
+        <CardContent className="p-0">
           {isLoading ? (
-            <div className="space-y-3">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+            <div className="p-6 space-y-3">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
           ) : users.length === 0 ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">Tidak ada user yang cocok.</p>
+            <p className="py-12 text-center text-sm text-muted-foreground">Tidak ada user yang cocok dengan pencarian.</p>
           ) : (
             <>
-              <div className="-mx-4 overflow-x-auto sm:-mx-6">
-                <table className="w-full min-w-[720px] text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
-                      <th className="px-4 py-2 font-medium sm:px-6">Nama & Email</th>
-                      <th className="px-3 py-2 font-medium">Role</th>
-                      <th className="px-3 py-2 font-medium">Terdaftar</th>
-                      <th className="px-3 py-2 font-medium">Status</th>
-                      <th className="px-4 py-2 text-right font-medium sm:px-6">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {users.map((u) => (
-                      <tr key={u.id} className="hover:bg-muted/30">
-                        <td className="px-4 py-3 sm:px-6">
-                          <p className="font-medium text-foreground">{u.name}</p>
-                          <p className="text-xs text-muted-foreground">{u.email}</p>
-                        </td>
-                        <td className="px-3 py-3">
-                          <Badge variant={u.role === 'admin' ? 'destructive' : u.role === 'teacher' ? 'primary' : 'default'}>{u.role}</Badge>
-                        </td>
-                        <td className="px-3 py-3 text-muted-foreground">{fmtDate(u.createdAt)}</td>
-                        <td className="px-3 py-3">
-                          {u.isActive ? (
-                            <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600"><ShieldCheck className="h-3.5 w-3.5" /> Aktif</span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-xs font-medium text-red-500"><ShieldX className="h-3.5 w-3.5" /> Nonaktif</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-right sm:px-6">
-                          <div className="flex items-center justify-end gap-1.5">
+              <Table className="border-0 rounded-none">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nama & Email</TableHead>
+                    <TableHead>Peran</TableHead>
+                    <TableHead>Terdaftar</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((u) => (
+                    <TableRow key={u.id}>
+                      <TableCell>
+                        <p className="font-semibold text-foreground">{u.name}</p>
+                        <p className="text-xs text-muted-foreground">{u.email}</p>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={u.role === 'admin' ? 'destructive' : u.role === 'teacher' ? 'primary' : 'default'} className="capitalize">
+                          {u.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{fmtDate(u.createdAt)}</TableCell>
+                      <TableCell>
+                        {u.isActive ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                            <ShieldCheck className="h-3.5 w-3.5" /> Aktif
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-destructive">
+                            <ShieldX className="h-3.5 w-3.5" /> Nonaktif
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setEditingUser(u);
+                              setEditName(u.name);
+                              setEditRole(u.role);
+                            }}
+                            title="Edit data user"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          {u.role !== 'admin' && (
                             <Button
                               size="sm"
-                              variant="ghost"
-                              onClick={() => {
-                                setEditingUser(u);
-                                setEditName(u.name);
-                                setEditRole(u.role);
-                              }}
-                              title="Edit data user"
+                              variant={u.isActive ? 'outline' : 'secondary'}
+                              disabled={toggleMutation.isPending}
+                              onClick={() => toggleMutation.mutate(u)}
                             >
-                              <Pencil className="h-3.5 w-3.5" />
+                              <UserCog className="h-3.5 w-3.5" /> {u.isActive ? 'Nonaktifkan' : 'Aktifkan'}
                             </Button>
-                            {u.role !== 'admin' && (
-                              <Button
-                                size="sm"
-                                variant={u.isActive ? 'outline' : 'secondary'}
-                                disabled={toggleMutation.isPending}
-                                onClick={() => toggleMutation.mutate(u)}
-                              >
-                                <UserCog className="h-3.5 w-3.5" /> {u.isActive ? 'Nonaktifkan' : 'Aktifkan'}
-                              </Button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
 
               {/* Pagination */}
-              <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-                <p className="text-xs text-muted-foreground">{data?.pagination.total ?? 0} user</p>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" disabled={page <= 1 || isLoading} onClick={() => setPage((p) => p - 1)}>Sebelumnya</Button>
-                  <span className="self-center text-xs text-muted-foreground">{page}/{totalPages}</span>
-                  <Button size="sm" variant="outline" disabled={page >= totalPages || isLoading} onClick={() => setPage((p) => p + 1)}>Berikutnya</Button>
+              <div className="flex items-center justify-between border-t border-border p-4">
+                <p className="text-xs text-muted-foreground">Total {data?.pagination.total ?? 0} pengguna</p>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline" disabled={page <= 1 || isLoading} onClick={() => setPage((p) => p - 1)}>
+                    Sebelumnya
+                  </Button>
+                  <span className="text-xs font-semibold text-foreground px-2">{page} / {totalPages}</span>
+                  <Button size="sm" variant="outline" disabled={page >= totalPages || isLoading} onClick={() => setPage((p) => p + 1)}>
+                    Berikutnya
+                  </Button>
                 </div>
               </div>
             </>
@@ -266,95 +276,81 @@ export default function AdminUsers() {
         </CardContent>
       </Card>
 
-      {/* Modal Tambah User */}
-      {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="relative w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl text-card-foreground animate-in fade-in zoom-in-95 duration-150">
-            <button
-              onClick={() => setShowCreateModal(false)}
-              className="absolute right-4 top-4 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-            </button>
+      {/* Modal Tambah User using Radix Dialog */}
+      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Tambah Pengguna Baru</DialogTitle>
+          </DialogHeader>
 
-            <h3 className="text-lg font-bold text-foreground">Tambah Pengguna Baru</h3>
-            <p className="mt-1 text-xs text-muted-foreground">Buat akun untuk siswa atau pengajar baru.</p>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              createMutation.mutate();
+            }}
+            className="space-y-4 pt-2"
+          >
+            <Input
+              label="Nama Lengkap"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Contoh: Budi Santoso"
+              required
+            />
+            <Input
+              label="Alamat Email"
+              type="email"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              placeholder="budi@example.com"
+              required
+            />
+            <Input
+              label="Password Akun"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Minimal 8 karakter"
+              required
+            />
+            <div>
+              <label className="text-xs font-semibold text-foreground">Peran / Role</label>
+              <select
+                value={newRole}
+                onChange={(e) => setNewRole(e.target.value as typeof newRole)}
+                className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary transition-colors"
+              >
+                <option value="student">Student (Santri / Siswa)</option>
+                <option value="teacher">Teacher (Pengajar)</option>
+              </select>
+            </div>
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                createMutation.mutate();
-              }}
-              className="mt-4 space-y-4"
-            >
-              <Input
-                label="Nama Lengkap"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="Contoh: Budi Santoso"
-                required
-              />
-              <Input
-                label="Alamat Email"
-                type="email"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                placeholder="budi@example.com"
-                required
-              />
-              <Input
-                label="Password Akun"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Minimal 8 karakter"
-                required
-              />
-              <div>
-                <label className="text-sm font-medium text-foreground">Peran / Role</label>
-                <select
-                  value={newRole}
-                  onChange={(e) => setNewRole(e.target.value as typeof newRole)}
-                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary-500"
-                >
-                  <option value="student">Student (Siswa)</option>
-                  <option value="teacher">Teacher (Pengajar)</option>
-                </select>
-              </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button type="button" variant="outline" size="sm" onClick={() => setShowCreateModal(false)}>
+                Batal
+              </Button>
+              <Button type="submit" size="sm" loading={createMutation.isPending}>
+                Simpan User
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-              <div className="mt-6 flex justify-end gap-2 pt-2">
-                <Button type="button" variant="outline" size="sm" onClick={() => setShowCreateModal(false)}>
-                  Batal
-                </Button>
-                <Button type="submit" size="sm" loading={createMutation.isPending}>
-                  Simpan User
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Edit User */}
-      {editingUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="relative w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-xl text-card-foreground animate-in fade-in zoom-in-95 duration-150">
-            <button
-              onClick={() => setEditingUser(null)}
-              className="absolute right-4 top-4 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <h3 className="text-lg font-bold text-foreground">Edit Data Pengguna</h3>
-            <p className="mt-1 text-xs text-muted-foreground">{editingUser.email}</p>
+      {/* Modal Edit User using Radix Dialog */}
+      <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
+        {editingUser && (
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Data Pengguna</DialogTitle>
+            </DialogHeader>
 
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 editMutation.mutate();
               }}
-              className="mt-4 space-y-4"
+              className="space-y-4 pt-2"
             >
               <Input
                 label="Nama Lengkap"
@@ -363,19 +359,19 @@ export default function AdminUsers() {
                 required
               />
               <div>
-                <label className="text-sm font-medium text-foreground">Peran / Role</label>
+                <label className="text-xs font-semibold text-foreground">Peran / Role</label>
                 <select
                   value={editRole}
                   onChange={(e) => setEditRole(e.target.value as typeof editRole)}
-                  className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary-500"
+                  className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary transition-colors"
                 >
-                  <option value="student">Student (Siswa)</option>
+                  <option value="student">Student (Santri / Siswa)</option>
                   <option value="teacher">Teacher (Pengajar)</option>
-                  <option value="admin">Admin</option>
+                  <option value="admin">Administrator</option>
                 </select>
               </div>
 
-              <div className="mt-6 flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="outline" size="sm" onClick={() => setEditingUser(null)}>
                   Batal
                 </Button>
@@ -384,9 +380,9 @@ export default function AdminUsers() {
                 </Button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
+          </DialogContent>
+        )}
+      </Dialog>
     </div>
   );
 }

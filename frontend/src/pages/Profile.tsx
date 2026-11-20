@@ -153,19 +153,19 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/40">
+    <div className="min-h-screen bg-muted/30">
       <div className="mx-auto max-w-3xl px-4 py-8">
-        <Link to="/dashboard" className="mb-6 inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:underline">
+        <Link to="/dashboard" className="mb-6 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
           <ArrowLeft className="h-4 w-4" /> Kembali ke Dashboard
         </Link>
 
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-600 text-white">
+        <div className="mb-6 flex items-center gap-3.5">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-xs">
             <UserCircle2 className="h-7 w-7" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground">Profil Saya</h1>
-            {user && <p className="text-sm text-muted-foreground">{user.email}</p>}
+            <h1 className="text-xl font-bold text-foreground">Profil Pengguna</h1>
+            {user && <p className="text-xs text-muted-foreground">{user.email}</p>}
           </div>
         </div>
 

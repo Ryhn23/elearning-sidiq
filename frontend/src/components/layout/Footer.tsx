@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BookOpen, Award, Video, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Award, Video, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -8,19 +8,20 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* Brand */}
           <div className="space-y-4 md:col-span-1">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-white shadow-xs">
-                <BookOpen className="h-5 w-5" />
+            <Link to="/" className="flex items-center gap-2.5">
+              <img src="/logo.png" alt="Sidiq Logo" className="h-8 w-8 object-contain" />
+              <div className="flex flex-col">
+                <span className="text-base font-bold tracking-tight text-foreground leading-tight">
+                  Sidiq <span className="text-primary-600">E-Learning</span>
+                </span>
+                <span className="text-[10px] font-medium text-muted-foreground">Platform Pembelajaran Terpadu</span>
               </div>
-              <span className="text-lg font-bold tracking-tight text-foreground">
-                E-Learning<span className="text-primary-600">.</span>
-              </span>
             </Link>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Platform pembelajaran digital terstruktur yang terinspirasi oleh standar Moodle LMS. Belajar mandiri, interaktif, dan teruji.
+              Platform pembelajaran digital terstruktur yang terintegrasi dengan ekosistem SIDIQ Pesantren. Belajar mandiri, interaktif, dan teruji.
             </p>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" />
+              <ShieldCheck className="h-4 w-4 text-primary-600" />
               <span>Sertifikat Digital Terverifikasi QR</span>
             </div>
           </div>

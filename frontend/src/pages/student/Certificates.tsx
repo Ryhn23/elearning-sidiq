@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Award, Download, ExternalLink, CheckCircle2 } from 'lucide-react';
+import { Award, Download, ExternalLink } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -72,22 +72,22 @@ export default function StudentCertificates() {
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-bold text-foreground sm:text-2xl">Sertifikat Saya</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Sertifikat kelulusan kursus yang telah kamu selesaikan.</p>
+        <p className="mt-1 text-xs text-muted-foreground">Sertifikat kelulusan digital resmi dengan kode verifikasi QR.</p>
       </div>
 
       {/* Tersedia untuk dibuat */}
       {available.length > 0 && (
-        <Card>
-          <CardContent>
-            <h2 className="mb-3 text-sm font-semibold text-foreground">Sertifikat Tersedia</h2>
+        <Card className="rounded-xl border-primary/20 bg-primary-50/30 dark:bg-primary-950/20">
+          <CardContent className="p-5">
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-primary">Sertifikat Siap Diterbitkan</h2>
             <ul className="divide-y divide-border">
               {available.map((e) => (
                 <li key={e.courseId} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-foreground">{e.course.title}</p>
-                    <p className="text-xs text-muted-foreground">Progress 100% — siap dibuat</p>
+                    <p className="truncate text-sm font-semibold text-foreground">{e.course.title}</p>
+                    <p className="text-xs text-muted-foreground">Progress 100% — Seluruh materi telah diselesaikan</p>
                   </div>
-                  <Button size="sm" loading={generateMutation.isPending} onClick={() => generateMutation.mutate(e.courseId)}>
+                  <Button size="sm" loading={generateMutation.isPending} onClick={() => generateMutation.mutate(e.courseId)} className="gap-1.5 shadow-xs">
                     <Award className="h-3.5 w-3.5" /> Buat Sertifikat
                   </Button>
                 </li>
@@ -98,16 +98,18 @@ export default function StudentCertificates() {
       )}
 
       {/* Daftar sertifikat */}
-      <Card>
-        <CardContent>
+      <Card className="rounded-xl">
+        <CardContent className="p-6">
           {certsLoading || enrollLoading ? (
-            <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}</div>
+            <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}</div>
           ) : certificates.length === 0 && available.length === 0 ? (
-            <div className="flex flex-col items-center py-10 text-center">
-              <Award className="mb-3 h-10 w-10 text-muted-foreground/50" />
-              <p className="text-sm font-medium text-foreground">Belum ada sertifikat</p>
-              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                Selesaikan kursus hingga 100% untuk mendapatkan sertifikat kelulusan.
+            <div className="flex flex-col items-center py-12 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground mb-4">
+                <Award className="h-7 w-7" />
+              </div>
+              <p className="text-base font-semibold text-foreground">Belum ada sertifikat</p>
+              <p className="mt-1 max-w-sm text-xs text-muted-foreground">
+                Selesaikan semua materi dan ujian kursus hingga 100% untuk mendapatkan sertifikat kelulusan ber-QR resmi.
               </p>
             </div>
           ) : (
@@ -116,32 +118,37 @@ export default function StudentCertificates() {
                 <ul className="divide-y divide-border">
                   {certificates.map((c) => (
                     <li key={c.id} className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="min-w-0">
-                        <p className="truncate font-medium text-foreground">{c.courseTitle}</p>
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                          Diterbitkan {fmtDate(c.issuedAt)} · Kode: <span className="font-mono">{c.code}</span>
-                        </p>
+                      <div className="min-w-0 flex items-center gap-3.5">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                          <Award className="h-6 w-6" />
+                        </div>
+                        <div>
+                          <p className="truncate text-sm font-bold text-foreground">{c.courseTitle}</p>
+                          <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                            <span>No: <code className="font-mono font-medium text-foreground">{c.code}</code></span>
+                            <span>•</span>
+                            <span>Terbit: {fmtDate(c.issuedAt)}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex shrink-0 items-center gap-2">
+
+                      <div className="flex items-center gap-2 self-end sm:self-auto">
+                        <Link to={`/verify/${c.code}`} target="_blank" rel="noreferrer">
+                          <Button size="sm" variant="ghost" className="gap-1 text-xs">
+                            <ExternalLink className="h-3.5 w-3.5" /> Verifikasi QR
+                          </Button>
+                        </Link>
                         {c.pdfUrl && (
-                          <a href={c.pdfUrl} target="_blank" rel="noreferrer"
-                            className="inline-flex h-8 items-center gap-1 rounded-md border border-border bg-background px-3 text-xs font-medium text-foreground hover:bg-muted">
-                            <Download className="h-3.5 w-3.5" /> Unduh PDF
+                          <a href={c.pdfUrl} target="_blank" rel="noreferrer">
+                            <Button size="sm" variant="outline" className="gap-1 text-xs">
+                              <Download className="h-3.5 w-3.5" /> Unduh PDF
+                            </Button>
                           </a>
                         )}
-                        <Link to={`/verify/${c.code}`}
-                          className="inline-flex h-8 items-center gap-1 rounded-md border border-border bg-background px-3 text-xs font-medium text-primary-600 hover:bg-muted">
-                          <ExternalLink className="h-3.5 w-3.5" /> Verifikasi
-                        </Link>
                       </div>
                     </li>
                   ))}
                 </ul>
-              )}
-              {available.length === 0 && certificates.length > 0 && (
-                <p className="mt-4 flex items-center gap-1 border-t border-border pt-3 text-xs text-muted-foreground">
-                  <CheckCircle2 className="h-3.5 w-3.5" /> Semua kursus selesai sudah memiliki sertifikat.
-                </p>
               )}
             </>
           )}

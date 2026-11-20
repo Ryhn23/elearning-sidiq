@@ -50,24 +50,25 @@ export default function AdminDashboard() {
   const totals = data?.totals;
 
   const stats = [
-    { label: 'Total Pengguna', value: usersData?.pagination?.total ?? totals?.users ?? 0, icon: <Users className="h-5 w-5" />, color: 'text-primary-600 bg-primary-50', to: '/admin/users' },
-    { label: 'Pengajar', value: totals?.teachers ?? 0, icon: <ShieldCheck className="h-5 w-5" />, color: 'text-purple-600 bg-purple-50', to: '/admin/users' },
-    { label: 'Kursus Terbit', value: coursesData?.pagination?.total ?? totals?.publishedCourses ?? 0, icon: <BookOpen className="h-5 w-5" />, color: 'text-blue-600 bg-blue-50', to: '/admin/courses' },
-    { label: 'Total Enrollment', value: totals?.enrollments ?? 0, icon: <UserCheck className="h-5 w-5" />, color: 'text-green-600 bg-green-50', to: '/admin/analytics' },
+    { label: 'Total Pengguna', value: usersData?.pagination?.total ?? totals?.users ?? 0, icon: <Users className="h-5 w-5" />, color: 'text-primary bg-primary/10 border-primary/20', to: '/admin/users' },
+    { label: 'Guru & Pengajar', value: totals?.teachers ?? 0, icon: <ShieldCheck className="h-5 w-5" />, color: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20', to: '/admin/users' },
+    { label: 'Kursus Terbit', value: coursesData?.pagination?.total ?? totals?.publishedCourses ?? 0, icon: <BookOpen className="h-5 w-5" />, color: 'text-amber-600 bg-amber-500/10 border-amber-500/20', to: '/admin/courses' },
+    { label: 'Total Santri Belajar', value: totals?.enrollments ?? 0, icon: <UserCheck className="h-5 w-5" />, color: 'text-indigo-600 bg-indigo-500/10 border-indigo-500/20', to: '/admin/analytics' },
   ];
 
   const quickActions = [
-    { title: 'Manajemen User', description: 'Buat, edit, aktifkan & kelola akun pengguna.', to: '/admin/users', icon: <Users className="h-5 w-5" /> },
-    { title: 'Manajemen Kursus', description: 'Review, publish & kelola kurikulum kursus.', to: '/admin/courses', icon: <BookOpen className="h-5 w-5" /> },
-    { title: 'Kategori', description: 'Kelola kategori & tag kursus.', to: '/admin/categories', icon: <FolderOpen className="h-5 w-5" /> },
-    { title: 'Analitik', description: 'Pantau performa & metrik platform.', to: '/admin/analytics', icon: <UserCheck className="h-5 w-5" /> },
+    { title: 'Manajemen Pengguna', description: 'Buat, perbarui, dan kontrol akun santri serta guru.', to: '/admin/users', icon: <Users className="h-5 w-5" /> },
+    { title: 'Manajemen Kursus', description: 'Tinjau, moderasi, dan kelola kurikulum materi.', to: '/admin/courses', icon: <BookOpen className="h-5 w-5" /> },
+    { title: 'Kategori Kursus', description: 'Atur rumpun ilmu, mapel, dan label materi.', to: '/admin/categories', icon: <FolderOpen className="h-5 w-5" /> },
+    { title: 'Analitik & Evaluasi', description: 'Laporan metrik kelulusan dan aktivitas belajar.', to: '/admin/analytics', icon: <UserCheck className="h-5 w-5" /> },
   ];
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-foreground sm:text-2xl">Dashboard Admin</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Ringkasan platform e-learning.</p>
+      <div className="rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 shadow-sm">
+        <span className="text-xs font-semibold uppercase tracking-wider text-primary">Pusat Kendali Sistem</span>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Dasbor Administrator</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Pemantauan platform E-Learning terpadu terhubung dengan SIDIQ ERP Pesantren.</p>
       </div>
 
       {/* Stats */}
@@ -77,7 +78,7 @@ export default function AdminDashboard() {
             {Array.from({ length: 4 }).map((_, i) => (
               <Card key={i} className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 animate-pulse rounded-md bg-muted" />
+                  <div className="h-12 w-12 animate-pulse rounded-xl bg-muted" />
                   <div className="space-y-2">
                     <div className="h-7 w-16 animate-pulse rounded bg-muted" />
                     <div className="h-3 w-24 animate-pulse rounded bg-muted" />
@@ -88,12 +89,12 @@ export default function AdminDashboard() {
           </>
         ) : (
           stats.map((s) => (
-            <Link key={s.label} to={s.to} className="block rounded-lg">
-              <Card className="p-4 transition-colors hover:bg-muted/40">
+            <Link key={s.label} to={s.to} className="block rounded-xl group">
+              <Card className="p-4 border border-border shadow-sm transition-all hover:border-primary/40 hover:shadow-md">
                 <div className="flex items-center gap-3">
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-md ${s.color}`}>{s.icon}</div>
+                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${s.color}`}>{s.icon}</div>
                   <div>
-                    <p className="text-2xl font-bold text-foreground">{s.value}</p>
+                    <p className="text-2xl font-bold text-foreground leading-tight">{s.value}</p>
                     <p className="text-xs text-muted-foreground">{s.label}</p>
                   </div>
                 </div>

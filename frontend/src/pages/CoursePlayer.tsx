@@ -160,10 +160,17 @@ export default function CoursePlayer() {
     <div className="flex h-screen flex-col bg-muted/40">
       {/* Top bar */}
       <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background px-4">
-        <button className="lg:hidden" onClick={() => setSidebarOpen(!sidebarOpen)} aria-label="Menu pelajaran">
+        <button
+          className="lg:hidden p-1.5 rounded-lg text-muted-foreground hover:bg-muted"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          aria-label="Menu pelajaran"
+        >
           {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
-        <Link to={`/courses/${slug}`} className="flex items-center gap-1 text-sm text-primary-600 hover:underline">
+        <Link
+          to={`/courses/${slug}`}
+          className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+        >
           <ArrowLeft className="h-4 w-4" />
           <span className="hidden sm:inline">Detail Kursus</span>
         </Link>
@@ -173,9 +180,9 @@ export default function CoursePlayer() {
           <button
             onClick={() => setPlayerTab('lesson')}
             className={cn(
-              'flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+              'flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all',
               playerTab === 'lesson'
-                ? 'bg-primary-100 text-primary-800'
+                ? 'bg-primary text-primary-foreground shadow-xs'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             )}
           >
@@ -185,9 +192,9 @@ export default function CoursePlayer() {
           <button
             onClick={() => setPlayerTab('discussion')}
             className={cn(
-              'flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+              'flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all',
               playerTab === 'discussion'
-                ? 'bg-primary-100 text-primary-800'
+                ? 'bg-primary text-primary-foreground shadow-xs'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             )}
           >
@@ -197,9 +204,9 @@ export default function CoursePlayer() {
           <button
             onClick={() => setPlayerTab('announcements')}
             className={cn(
-              'flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+              'flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all',
               playerTab === 'announcements'
-                ? 'bg-primary-100 text-primary-800'
+                ? 'bg-primary text-primary-foreground shadow-xs'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             )}
           >
@@ -209,9 +216,9 @@ export default function CoursePlayer() {
           <button
             onClick={() => setPlayerTab('notes')}
             className={cn(
-              'flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer',
+              'flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold transition-all cursor-pointer',
               playerTab === 'notes'
-                ? 'bg-primary-100 text-primary-800'
+                ? 'bg-primary text-primary-foreground shadow-xs'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             )}
           >
@@ -221,11 +228,11 @@ export default function CoursePlayer() {
         </div>
 
         <div className="ml-auto flex min-w-0 items-center gap-3">
-          <span className="truncate text-sm font-medium text-foreground">{course.title}</span>
-          <div className="hidden w-40 sm:block">
+          <span className="truncate text-xs font-medium text-foreground max-w-[140px] sm:max-w-xs">{course.title}</span>
+          <div className="hidden w-36 sm:block">
             <Progress value={progress} size="sm" />
           </div>
-          <span className="text-xs font-medium text-muted-foreground">{Math.round(progress)}%</span>
+          <span className="text-xs font-semibold text-primary">{Math.round(progress)}%</span>
         </div>
       </header>
 
@@ -256,14 +263,16 @@ export default function CoursePlayer() {
                             setSidebarOpen(false);
                           }}
                           className={cn(
-                            'flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left text-sm transition-colors',
-                            active ? 'bg-primary-50 font-medium text-primary-700' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                            'flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-xs transition-all',
+                            active
+                              ? 'bg-primary/10 font-semibold text-primary shadow-xs border-l-2 border-primary'
+                              : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                           )}
                         >
                           {done ? (
-                            <CheckCircle2 className="h-4 w-4 shrink-0 text-green-600" />
+                            <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
                           ) : (
-                            <Circle className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+                            <Circle className="h-4 w-4 shrink-0 text-muted-foreground/40" />
                           )}
                           <span className="flex-1 truncate">{lesson.title}</span>
                           <span className="text-xs text-muted-foreground">{formatDuration(lesson.durationMinutes)}</span>
