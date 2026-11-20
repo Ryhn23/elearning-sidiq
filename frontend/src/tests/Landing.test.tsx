@@ -51,8 +51,8 @@ function renderLanding() {
 describe('Landing Page Component', () => {
   it('renders hero section and brand title', () => {
     renderLanding();
-    expect(screen.getByText(/Platform LMS Terinspirasi Standar Moodle/i)).toBeTruthy();
-    expect(screen.getByText(/Tingkatkan Keterampilanmu dengan/i)).toBeTruthy();
+    expect(screen.getByText(/Ekosistem Pembelajaran Digital Terintegrasi SIDIQ/i)).toBeTruthy();
+    expect(screen.getByText(/Tingkatkan Keterampilan & Ilmu dengan/i)).toBeTruthy();
     expect(screen.getByText(/Pembelajaran Terstruktur/i)).toBeTruthy();
   });
 

@@ -10,6 +10,8 @@ RUN npm run build
 
 FROM nginx:alpine
 
+RUN rm -f /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
+
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
