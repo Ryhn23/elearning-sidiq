@@ -1,22 +1,17 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Star, Users, Clock, BookOpen, Layers } from 'lucide-react';
+import { Search, Star, Users, BookOpen } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Card } from '@/components/ui/Card';
+import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Pagination } from '@/components/ui/Pagination';
 import { formatPrice } from '@/lib/utils';
-import { Footer } from '@/components/layout/Footer';
+import { PageHeader } from '@/components/layout/PageHeader';
 import type { CourseListItem, PaginationMeta } from '@/types/api';
-
-const levelLabel: Record<string, string> = {
-  beginner: 'Pemula',
-  intermediate: 'Menengah',
-  advanced: 'Mahir',
-  all_levels: 'Semua Level',
-};
 
 interface CatalogResponse {
   data: CourseListItem[];
@@ -46,7 +41,7 @@ export default function CourseCatalog() {
         params: {
           search: search || undefined,
           page,
-          limit: 9,
+          limit: 12,
           category: category || undefined,
           level: level || undefined,
           sort,
@@ -68,179 +63,196 @@ export default function CourseCatalog() {
   const pagination = data?.pagination;
 
   return (
-    <div className="min-h-screen flex flex-col bg-muted/30">
-      <div className="flex-1">
-        {/* Hero */}
-        <div className="bg-background border-b border-border">
-          <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-            <div className="max-w-2xl">
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Temukan Kursus Pilihan
-              </h1>
-              <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-                Jelajahi materi berkualitas dan terstruktur dari ustadz serta pengajar berpengalaman.
-              </p>
-            </div>
+    <div className="space-y-6 w-full pb-10">
+      {/* Standard Page Header */}
+      <PageHeader
+        title="Katalog Kursus & Materi Pembelajaran"
+        subtitle="Jelajahi modul silabus berkualitas dari ustadz dan pengajar berpengalaman Pesantren SIDIQ."
+        icon={BookOpen}
+      />
 
-            {/* Search */}
-            <div className="relative mt-6 max-w-xl">
-              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setParam('search', e.target.value);
-                }}
-                placeholder="Cari materi, judul kursus, atau ustadz pengajar..."
-                className="h-11 w-full rounded-xl border border-border bg-background pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-              />
-            </div>
+      {/* Hero Filter Bar */}
+      <div className="rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-card to-emerald-500/5 p-5 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <div className="relative w-full sm:max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setParam('search', e.target.value);
+              }}
+              placeholder="Cari materi, judul kursus, atau nama pengajar..."
+              className="pl-9 rounded-xl bg-background"
+            />
+          </div>
 
-            {/* Filters */}
-            <div className="mt-4 flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground mr-1">
-                <Layers className="h-3.5 w-3.5" /> Filter:
-              </div>
-              <select
-                value={category}
-                onChange={(e) => setParam('category', e.target.value)}
-                className="h-9 rounded-xl border border-border bg-background px-3 text-xs font-medium text-foreground focus:border-primary focus:outline-none transition-colors"
-              >
-                <option value="">Semua Kategori</option>
-                {(categories ?? []).map((c) => (
-                  <option key={c.id} value={c.slug}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <select
+              value={category}
+              onChange={(e) => setParam('category', e.target.value)}
+              className="h-10 rounded-xl border border-border bg-background px-3 text-xs font-semibold text-foreground focus:border-primary transition-colors"
+            >
+              <option value="">Semua Kategori</option>
+              {(categories ?? []).map((c) => (
+                <option key={c.id} value={c.slug}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
 
-              <select
-                value={level}
-                onChange={(e) => setParam('level', e.target.value)}
-                className="h-9 rounded-xl border border-border bg-background px-3 text-xs font-medium text-foreground focus:border-primary focus:outline-none transition-colors"
-              >
-                <option value="">Semua Tingkat</option>
-                <option value="beginner">Pemula</option>
-                <option value="intermediate">Menengah</option>
-                <option value="advanced">Mahir</option>
-              </select>
+            <select
+              value={level}
+              onChange={(e) => setParam('level', e.target.value)}
+              className="h-10 rounded-xl border border-border bg-background px-3 text-xs font-semibold text-foreground focus:border-primary transition-colors"
+            >
+              <option value="">Semua Tingkatan</option>
+              <option value="beginner">Pemula</option>
+              <option value="intermediate">Menengah</option>
+              <option value="advanced">Mahir</option>
+            </select>
 
-              <select
-                value={sort}
-                onChange={(e) => setParam('sort', e.target.value)}
-                className="h-9 rounded-xl border border-border bg-background px-3 text-xs font-medium text-foreground focus:border-primary focus:outline-none transition-colors"
-              >
-                <option value="newest">Terbaru</option>
-                <option value="popular">Paling Populer</option>
-                <option value="rating">Rating Tertinggi</option>
-              </select>
-            </div>
+            <select
+              value={sort}
+              onChange={(e) => setParam('sort', e.target.value)}
+              className="h-10 rounded-xl border border-border bg-background px-3 text-xs font-semibold text-foreground focus:border-primary transition-colors"
+            >
+              <option value="newest">Terbaru</option>
+              <option value="popular">Terpopuler</option>
+              <option value="rating">Rating Tertinggi</option>
+            </select>
           </div>
         </div>
 
-        {/* Course Grid */}
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          {isLoading ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i} className="p-4 rounded-xl">
-                  <Skeleton className="mb-4 h-40 w-full rounded-lg" />
-                  <Skeleton className="mb-2 h-5 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                </Card>
-              ))}
-            </div>
-          ) : courses.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground mb-4">
-                <BookOpen className="h-7 w-7" />
-              </div>
-              <p className="text-base font-semibold text-foreground">Kursus tidak ditemukan</p>
-              <p className="mt-1 text-sm text-muted-foreground">Coba ubah kata kunci pencarian atau sesuaikan filter Anda.</p>
-            </div>
-          ) : (
-            <>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {courses.map((course) => (
-                  <CourseCard key={course.id} course={course} />
-                ))}
-              </div>
-              {pagination && (
-                <div className="mt-10">
-                  <Pagination
-                    page={pagination.page}
-                    totalPages={pagination.totalPages}
-                    onPageChange={(p) => setParam('page', String(p))}
-                  />
-                </div>
-              )}
-            </>
-          )}
+        {/* Category Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-1 no-scrollbar">
+          <button
+            onClick={() => setParam('category', '')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              category === ''
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'bg-card border border-border text-muted-foreground hover:bg-muted'
+            }`}
+          >
+            Semua
+          </button>
+          {(categories ?? []).map((c) => (
+            <button
+              key={c.id}
+              onClick={() => setParam('category', c.slug)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                category === c.slug
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'bg-card border border-border text-muted-foreground hover:bg-muted'
+              }`}
+            >
+              {c.name}
+            </button>
+          ))}
         </div>
       </div>
-      <Footer />
-    </div>
-  );
-}
 
-function CourseCard({ course }: { course: CourseListItem }) {
-  return (
-    <Link to={`/courses/${course.slug}`} className="group block h-full">
-      <Card className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md">
-        {/* Thumbnail */}
-        <div className="relative aspect-video w-full overflow-hidden bg-primary-50/50 dark:bg-primary-950/20">
-          {course.thumbnailUrl ? (
-            <img
-              src={course.thumbnailUrl}
-              alt={course.title}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-primary-300">
-              <BookOpen className="h-10 w-10" />
-            </div>
-          )}
-          {course.category && (
-            <Badge variant="primary" className="absolute left-3 top-3 shadow-xs">
-              {course.category.name}
-            </Badge>
-          )}
+      {/* Courses Grid */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Card key={i} className="rounded-2xl overflow-hidden border border-border p-4 space-y-3">
+              <Skeleton className="h-40 w-full rounded-xl" />
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </Card>
+          ))}
         </div>
-
-        <div className="flex flex-1 flex-col gap-2 p-5">
-          <h3 className="line-clamp-2 text-base font-bold text-foreground transition-colors group-hover:text-primary">
-            {course.title}
-          </h3>
-          <p className="text-xs font-medium text-muted-foreground">
-            {course.instructor.name}
+      ) : courses.length === 0 ? (
+        <Card className="rounded-2xl p-12 text-center border-dashed">
+          <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3 text-muted-foreground">
+            <BookOpen className="h-6 w-6" />
+          </div>
+          <h3 className="text-base font-bold text-foreground">Tidak ada kursus ditemukan</h3>
+          <p className="mt-1 text-xs text-muted-foreground max-w-sm mx-auto">
+            Coba gunakan kata kunci lain atau ubah filter kategori di atas.
           </p>
+          <Button
+            size="sm"
+            variant="outline"
+            className="mt-4"
+            onClick={() => {
+              setSearch('');
+              setParam('search', '');
+              setParam('category', '');
+              setParam('level', '');
+            }}
+          >
+            Reset Semua Filter
+          </Button>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {courses.map((c) => (
+            <Link key={c.id} to={`/courses/${c.slug}`} className="group block">
+              <Card className="h-full rounded-2xl border border-border bg-card shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-200 overflow-hidden flex flex-col group-hover:-translate-y-1">
+                {/* Thumbnail */}
+                <div className="relative aspect-video w-full overflow-hidden bg-primary/10">
+                  {c.thumbnailUrl ? (
+                    <img
+                      src={c.thumbnailUrl}
+                      alt={c.title}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center">
+                      <BookOpen className="h-10 w-10 text-primary/40" />
+                    </div>
+                  )}
+                  {c.category && (
+                    <Badge className="absolute left-2.5 top-2.5 bg-background/80 backdrop-blur-md text-foreground border-border text-[10px] font-semibold">
+                      {c.category.name}
+                    </Badge>
+                  )}
+                </div>
 
-          <div className="mt-auto flex items-center gap-4 pt-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1 font-medium">
-              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-500" />
-              {course.averageRating > 0 ? course.averageRating.toFixed(1) : 'Baru'}
-            </span>
-            <span className="flex items-center gap-1">
-              <Users className="h-3.5 w-3.5" />
-              {course.totalEnrolled}
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5" />
-              {course.estimatedHours} jam
-            </span>
-          </div>
+                {/* Content */}
+                <CardContent className="p-4 flex-1 flex flex-col justify-between">
+                  <div className="space-y-1.5">
+                    <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                      <span>{c.instructor.name}</span>
+                    </p>
+                    <h3 className="font-bold text-foreground text-sm line-clamp-2 group-hover:text-primary transition-colors">
+                      {c.title}
+                    </h3>
+                  </div>
 
-          <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-            <Badge variant="outline" className="text-[11px] capitalize">
-              {levelLabel[course.level] ?? course.level}
-            </Badge>
-            <span className="text-sm font-bold text-foreground">
-              {formatPrice(course.price)}
-            </span>
-          </div>
+                  <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1 font-semibold text-amber-500">
+                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                      <span>{Number(c.averageRating).toFixed(1)}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Users className="h-3.5 w-3.5" />
+                      <span>{c.totalEnrolled} santri</span>
+                    </div>
+                    <div className="font-bold text-primary">
+                      {c.price === 0 ? 'Gratis' : formatPrice(c.price)}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
         </div>
-      </Card>
-    </Link>
+      )}
+
+      {/* Pagination */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="pt-4 flex justify-center">
+          <Pagination
+            page={pagination.page}
+            totalPages={pagination.totalPages}
+            onPageChange={(p) => setParam('page', String(p))}
+          />
+        </div>
+      )}
+    </div>
   );
 }

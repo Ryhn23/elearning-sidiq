@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, Pencil, Check, X } from 'lucide-react';
+import { Plus, Trash2, Pencil, Check, X, FolderOpen } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table';
 import { useToast } from '@/components/ui/useToast';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 interface CategoryRow {
   id: string;
@@ -93,97 +95,186 @@ export default function AdminCategories() {
   const list = categories ?? [];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-foreground sm:text-2xl">Manajemen Kategori Kursus</h1>
-        <p className="mt-1 text-xs text-muted-foreground">Kelola taksonomi kategori materi pembelajaran platform.</p>
+    <div className="space-y-6 w-full pb-8">
+      {/* Page Header */}
+      <PageHeader
+        title="Manajemen Kategori Kursus"
+        subtitle="Kelola taksonomi rumpun ilmu, bidang studi, dan pengelompokan silabus pesantren."
+        icon={FolderOpen}
+      />
+
+      {/* Metric Tiles */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4 flex flex-col gap-1 border-l-4 border-l-primary">
+          <span className="text-xs sm:text-sm font-medium text-muted-foreground">Total Kategori</span>
+          <span className="text-2xl font-bold text-foreground">{list.length}</span>
+        </div>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4 flex flex-col gap-1 border-l-4 border-l-emerald-500">
+          <span className="text-xs sm:text-sm font-medium text-muted-foreground">Status Taksonomi</span>
+          <span className="text-2xl font-bold text-emerald-600">Aktif Terhubung</span>
+        </div>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4 flex flex-col gap-1 border-l-4 border-l-blue-500 col-span-2 md:col-span-1">
+          <span className="text-xs sm:text-sm font-medium text-muted-foreground">Sinkronisasi Mapel</span>
+          <span className="text-2xl font-bold text-blue-600">SIDIQ Akademik</span>
+        </div>
       </div>
 
-      {/* Form tambah */}
-      <Card className="rounded-xl">
-        <CardContent className="p-5">
-          <form
-            onSubmit={(e) => { e.preventDefault(); createMutation.mutate(); }}
-            className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+      {/* Form Tambah Kategori */}
+      <div className="rounded-xl border bg-card shadow-sm p-5 space-y-3">
+        <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+          <Plus className="h-4 w-4 text-primary" /> Tambah Rumpun Kategori Baru
+        </h3>
+        <form
+          onSubmit={(e) => { e.preventDefault(); createMutation.mutate(); }}
+          className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end pt-1"
+        >
+          <div>
+            <label htmlFor="cat-name" className="mb-1.5 block text-xs font-semibold text-foreground">
+              Nama Kategori
+            </label>
+            <Input
+              id="cat-name"
+              value={name}
+              onChange={(e) => { setName(e.target.value); if (!slugTouched) setSlug(slugify(e.target.value)); }}
+              placeholder="mis. Tahfidz & Al-Quran"
+              className="rounded-xl"
+            />
+          </div>
+          <div>
+            <label htmlFor="cat-slug" className="mb-1.5 block text-xs font-semibold text-foreground">
+              Slug URL
+            </label>
+            <Input
+              id="cat-slug"
+              value={slug}
+              onChange={(e) => { setSlug(e.target.value); setSlugTouched(true); }}
+              placeholder="tahfidz-al-quran"
+              className="rounded-xl font-mono text-xs"
+            />
+          </div>
+          <Button
+            type="submit"
+            loading={createMutation.isPending}
+            disabled={!name.trim()}
+            className="h-10 gap-1.5 shadow-sm font-semibold"
           >
-            <div>
-              <label htmlFor="cat-name" className="mb-1.5 block text-xs font-semibold text-foreground">Nama Kategori</label>
-              <input
-                id="cat-name"
-                value={name}
-                onChange={(e) => { setName(e.target.value); if (!slugTouched) setSlug(slugify(e.target.value)); }}
-                placeholder="mis. Tahfidz & Quran"
-                className="h-10 w-full rounded-xl border border-border bg-background px-3 text-xs text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-              />
-            </div>
-            <div>
-              <label htmlFor="cat-slug" className="mb-1.5 block text-xs font-semibold text-foreground">Slug URL</label>
-              <input
-                id="cat-slug"
-                value={slug}
-                onChange={(e) => { setSlug(e.target.value); setSlugTouched(true); }}
-                placeholder="tahfidz-quran"
-                className="h-10 w-full rounded-xl border border-border bg-background px-3 text-xs text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-              />
-            </div>
-            <Button type="submit" loading={createMutation.isPending} disabled={!name.trim()} className="h-10 gap-1.5 shadow-xs">
-              <Plus className="h-4 w-4" /> Tambah Kategori
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+            <Plus className="h-4 w-4" /> Simpan
+          </Button>
+        </form>
+      </div>
 
-      {/* List */}
-      <Card className="rounded-xl overflow-hidden">
-        <CardContent className="p-6">
+      {/* Table Container */}
+      <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+        <div className="overflow-x-auto max-w-[calc(100vw-2rem)] md:max-w-full">
           {isLoading ? (
-            <div className="space-y-3">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-xl" />)}</div>
-          ) : list.length === 0 ? (
-            <p className="py-10 text-center text-xs text-muted-foreground">Belum ada kategori.</p>
-          ) : (
-            <ul className="divide-y divide-border">
-              {list.map((cat) => (
-                <li key={cat.id} className="flex flex-col gap-3 py-3.5 sm:flex-row sm:items-center sm:justify-between first:pt-0 last:pb-0">
-                  {editingId === cat.id ? (
-                    <div className="grid w-full gap-2 sm:grid-cols-[1fr_1fr_80px_auto] sm:items-center">
-                      <input value={editName} onChange={(e) => setEditName(e.target.value)} aria-label="Nama kategori"
-                        className="h-9 rounded-xl border border-border bg-background px-3 text-xs text-foreground outline-none focus:border-primary" />
-                      <input value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Deskripsi (opsional)" aria-label="Deskripsi kategori"
-                        className="h-9 rounded-xl border border-border bg-background px-3 text-xs text-foreground outline-none focus:border-primary" />
-                      <input type="number" min={0} value={editSortOrder} onChange={(e) => setEditSortOrder(Number(e.target.value))} aria-label="Urutan"
-                        className="h-9 rounded-xl border border-border bg-background px-3 text-xs text-foreground outline-none focus:border-primary" />
-                      <div className="flex gap-1.5">
-                        <Button size="sm" loading={updateMutation.isPending} onClick={() => updateMutation.mutate({ id: cat.id, name: editName, description: editDescription, sortOrder: editSortOrder })}>
-                          <Check className="h-3.5 w-3.5" /> Simpan
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>
-                          <X className="h-3.5 w-3.5" /> Batal
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-foreground text-sm">{cat.name}</p>
-                        <p className="truncate text-xs text-muted-foreground">/{cat.slug}{cat.description ? ` — ${cat.description}` : ''}</p>
-                      </div>
-                      <div className="flex shrink-0 items-center gap-2">
-                        <span className="text-xs text-muted-foreground">urutan {cat.sortOrder}</span>
-                        <Button size="sm" variant="outline" onClick={() => { setEditingId(cat.id); setEditName(cat.name); setEditDescription(cat.description ?? ''); setEditSortOrder(cat.sortOrder); }}>
-                          <Pencil className="h-3.5 w-3.5" /> Edit
-                        </Button>
-                        <Button size="sm" variant="destructive" disabled={deleteMutation.isPending} onClick={() => deleteMutation.mutate(cat.id)}>
-                          <Trash2 className="h-3.5 w-3.5" /> Hapus
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </li>
+            <div className="p-6 space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full rounded-xl" />
               ))}
-            </ul>
+            </div>
+          ) : list.length === 0 ? (
+            <div className="py-12 text-center text-sm text-muted-foreground">
+              Belum ada kategori yang dibuat.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/40 hover:bg-muted/40">
+                  <TableHead className="w-12 text-center font-semibold">No.</TableHead>
+                  <TableHead className="font-semibold">Nama Kategori</TableHead>
+                  <TableHead className="font-semibold">Slug URL</TableHead>
+                  <TableHead className="font-semibold text-center">Urutan</TableHead>
+                  <TableHead className="text-right font-semibold">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {list.map((c, idx) => (
+                  <TableRow key={c.id} className="hover:bg-muted/30 transition-colors">
+                    <TableCell className="text-center font-medium text-muted-foreground w-12 text-xs">
+                      {idx + 1}
+                    </TableCell>
+                    <TableCell>
+                      {editingId === c.id ? (
+                        <Input
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="h-8 text-xs"
+                        />
+                      ) : (
+                        <p className="font-semibold text-foreground text-sm">{c.name}</p>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-mono text-xs text-muted-foreground">{c.slug}</span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {editingId === c.id ? (
+                        <Input
+                          type="number"
+                          value={editSortOrder}
+                          onChange={(e) => setEditSortOrder(Number(e.target.value))}
+                          className="h-8 w-16 text-xs mx-auto text-center"
+                        />
+                      ) : (
+                        <span className="text-xs font-semibold text-muted-foreground">{c.sortOrder}</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {editingId === c.id ? (
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            loading={updateMutation.isPending}
+                            onClick={() => updateMutation.mutate({ id: c.id, name: editName, description: editDescription, sortOrder: editSortOrder })}
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0"
+                            onClick={() => setEditingId(null)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0"
+                            onClick={() => {
+                              setEditingId(c.id);
+                              setEditName(c.name);
+                              setEditDescription(c.description || '');
+                              setEditSortOrder(c.sortOrder);
+                            }}
+                          >
+                            <Pencil className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"
+                            loading={deleteMutation.isPending}
+                            onClick={() => {
+                              if (confirm(`Hapus kategori "${c.name}"?`)) deleteMutation.mutate(c.id);
+                            }}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Search, UserCog, ShieldCheck, ShieldX, Plus, Download, Pencil } from 'lucide-react';
 import { api } from '@/lib/api';
-import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -10,6 +9,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/Table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/Dialog';
 import { useToast } from '@/components/ui/useToast';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 interface UserRow {
   id: string;
@@ -132,151 +132,213 @@ export default function AdminUsers() {
   };
 
   const users = data?.data ?? [];
+  const totalUsers = data?.pagination?.total ?? 0;
   const totalPages = data?.pagination?.totalPages ?? 1;
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-foreground sm:text-2xl">Manajemen Pengguna (User)</h1>
-          <p className="mt-1 text-xs text-muted-foreground">Kelola akun, peran, dan otorisasi pengguna seluruh platform.</p>
-        </div>
+  const countStudents = users.filter((u) => u.role === 'student').length;
+  const countTeachers = users.filter((u) => u.role === 'teacher').length;
+  const countAdmins = users.filter((u) => u.role === 'admin').length;
 
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            className="gap-1.5"
-            loading={exporting}
-            onClick={handleExportCsv}
-          >
-            <Download className="h-4 w-4" /> Export CSV
-          </Button>
-          <Button
-            size="sm"
-            className="gap-1.5 shadow-xs"
-            onClick={() => setShowCreateModal(true)}
-          >
-            <Plus className="h-4 w-4" /> Tambah User
-          </Button>
+  return (
+    <div className="space-y-6 w-full pb-8">
+      {/* Standardized SIDIQ Page Header */}
+      <PageHeader
+        title="Manajemen Pengguna (User)"
+        subtitle="Kelola akun, peran, dan otorisasi pengguna seluruh ekosistem pembelajaran SIDIQ."
+        icon={UserCog}
+        actions={
+          <>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 font-semibold"
+              loading={exporting}
+              onClick={handleExportCsv}
+            >
+              <Download className="h-4 w-4" /> Export CSV
+            </Button>
+            <Button
+              size="sm"
+              className="gap-1.5 shadow-sm font-semibold"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <Plus className="h-4 w-4" /> Tambah User
+            </Button>
+          </>
+        }
+      />
+
+      {/* SIDIQ Metric Stat Tiles (Colored Left Border Pattern) */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4 flex flex-col gap-1 border-l-4 border-l-primary">
+          <span className="text-xs sm:text-sm font-medium text-muted-foreground">Total Pengguna</span>
+          <span className="text-2xl font-bold text-foreground">{totalUsers}</span>
+        </div>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4 flex flex-col gap-1 border-l-4 border-l-emerald-500">
+          <span className="text-xs sm:text-sm font-medium text-muted-foreground">Santri / Siswa</span>
+          <span className="text-2xl font-bold text-emerald-600">{role === 'student' ? totalUsers : countStudents}</span>
+        </div>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4 flex flex-col gap-1 border-l-4 border-l-blue-500">
+          <span className="text-xs sm:text-sm font-medium text-muted-foreground">Asatidz / Guru</span>
+          <span className="text-2xl font-bold text-blue-600">{role === 'teacher' ? totalUsers : countTeachers}</span>
+        </div>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4 flex flex-col gap-1 border-l-4 border-l-amber-500">
+          <span className="text-xs sm:text-sm font-medium text-muted-foreground">Administrator</span>
+          <span className="text-2xl font-bold text-amber-600">{role === 'admin' ? totalUsers : countAdmins}</span>
         </div>
       </div>
 
-      {/* Filter */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1 sm:max-w-xs">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
+      {/* Search & Filter Bar */}
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Cari nama atau email..."
-            className="w-full rounded-xl border border-border bg-background py-2 pl-10 pr-3 text-xs text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+            className="pl-9 rounded-xl"
           />
         </div>
-        <select
-          value={role}
-          onChange={(e) => { setRole(e.target.value as typeof role); setPage(1); }}
-          className="rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary transition-colors"
-        >
-          <option value="all">Semua Role</option>
-          <option value="student">Student (Santri / Siswa)</option>
-          <option value="teacher">Teacher (Pengajar)</option>
-          <option value="admin">Administrator</option>
-        </select>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <select
+            value={role}
+            onChange={(e) => { setRole(e.target.value as typeof role); setPage(1); }}
+            className="rounded-xl border border-border bg-card px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary transition-colors h-10 w-full sm:w-auto"
+          >
+            <option value="all">Semua Peran (All)</option>
+            <option value="student">Student (Santri / Siswa)</option>
+            <option value="teacher">Teacher (Asatidz / Guru)</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </div>
       </div>
 
-      <Card className="rounded-xl overflow-hidden">
-        <CardContent className="p-0">
+      {/* Table Container in SIDIQ Card Style */}
+      <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+        <div className="overflow-x-auto max-w-[calc(100vw-2rem)] md:max-w-full">
           {isLoading ? (
-            <div className="p-6 space-y-3">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+            <div className="p-6 space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full rounded-xl" />
+              ))}
+            </div>
           ) : users.length === 0 ? (
-            <p className="py-12 text-center text-sm text-muted-foreground">Tidak ada user yang cocok dengan pencarian.</p>
+            <div className="py-12 text-center text-sm text-muted-foreground">
+              Tidak ada data pengguna yang cocok dengan kriteria pencarian.
+            </div>
           ) : (
-            <>
-              <Table className="border-0 rounded-none">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nama & Email</TableHead>
-                    <TableHead>Peran</TableHead>
-                    <TableHead>Terdaftar</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Aksi</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((u) => (
-                    <TableRow key={u.id}>
-                      <TableCell>
-                        <p className="font-semibold text-foreground">{u.name}</p>
-                        <p className="text-xs text-muted-foreground">{u.email}</p>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={u.role === 'admin' ? 'destructive' : u.role === 'teacher' ? 'primary' : 'default'} className="capitalize">
-                          {u.role}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{fmtDate(u.createdAt)}</TableCell>
-                      <TableCell>
-                        {u.isActive ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
-                            <ShieldCheck className="h-3.5 w-3.5" /> Aktif
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-destructive">
-                            <ShieldX className="h-3.5 w-3.5" /> Nonaktif
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/40 hover:bg-muted/40">
+                  <TableHead className="w-12 text-center font-semibold">No.</TableHead>
+                  <TableHead className="font-semibold">Nama Lengkap & Akun</TableHead>
+                  <TableHead className="font-semibold">Peran</TableHead>
+                  <TableHead className="font-semibold">Terdaftar</TableHead>
+                  <TableHead className="font-semibold">Status Akun</TableHead>
+                  <TableHead className="text-right font-semibold">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.map((u, idx) => (
+                  <TableRow key={u.id} className="hover:bg-muted/30 transition-colors">
+                    <TableCell className="text-center font-medium text-muted-foreground w-12 text-xs">
+                      {(page - 1) * 15 + idx + 1}
+                    </TableCell>
+                    <TableCell>
+                      <p className="font-semibold text-foreground text-sm">{u.name}</p>
+                      <p className="text-xs text-muted-foreground font-mono">{u.email}</p>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={u.role === 'admin' ? 'destructive' : u.role === 'teacher' ? 'primary' : 'default'}
+                        className="capitalize text-xs font-semibold"
+                      >
+                        {u.role === 'student' ? 'Santri' : u.role === 'teacher' ? 'Asatidz' : 'Admin'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground font-mono">
+                      {fmtDate(u.createdAt)}
+                    </TableCell>
+                    <TableCell>
+                      {u.isActive ? (
+                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full">
+                          <ShieldCheck className="h-3.5 w-3.5" /> Aktif
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-destructive bg-destructive/10 px-2.5 py-1 rounded-full">
+                          <ShieldX className="h-3.5 w-3.5" /> Nonaktif
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0"
+                          onClick={() => {
+                            setEditingUser(u);
+                            setEditName(u.name);
+                            setEditRole(u.role);
+                          }}
+                          title="Edit data pengguna"
+                        >
+                          <Pencil className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+                        </Button>
+                        {u.role !== 'admin' && (
                           <Button
                             size="sm"
-                            variant="ghost"
-                            onClick={() => {
-                              setEditingUser(u);
-                              setEditName(u.name);
-                              setEditRole(u.role);
-                            }}
-                            title="Edit data user"
+                            variant={u.isActive ? 'outline' : 'secondary'}
+                            className="h-8 text-xs font-semibold"
+                            disabled={toggleMutation.isPending}
+                            onClick={() => toggleMutation.mutate(u)}
                           >
-                            <Pencil className="h-3.5 w-3.5" />
+                            <UserCog className="mr-1 h-3.5 w-3.5" />
+                            {u.isActive ? 'Nonaktifkan' : 'Aktifkan'}
                           </Button>
-                          {u.role !== 'admin' && (
-                            <Button
-                              size="sm"
-                              variant={u.isActive ? 'outline' : 'secondary'}
-                              disabled={toggleMutation.isPending}
-                              onClick={() => toggleMutation.mutate(u)}
-                            >
-                              <UserCog className="h-3.5 w-3.5" /> {u.isActive ? 'Nonaktifkan' : 'Aktifkan'}
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-
-              {/* Pagination */}
-              <div className="flex items-center justify-between border-t border-border p-4">
-                <p className="text-xs text-muted-foreground">Total {data?.pagination.total ?? 0} pengguna</p>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" variant="outline" disabled={page <= 1 || isLoading} onClick={() => setPage((p) => p - 1)}>
-                    Sebelumnya
-                  </Button>
-                  <span className="text-xs font-semibold text-foreground px-2">{page} / {totalPages}</span>
-                  <Button size="sm" variant="outline" disabled={page >= totalPages || isLoading} onClick={() => setPage((p) => p + 1)}>
-                    Berikutnya
-                  </Button>
-                </div>
-              </div>
-            </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Modal Tambah User using Radix Dialog */}
+        {/* Standard Pagination Footer */}
+        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-border p-4 gap-3 text-xs text-muted-foreground">
+          <p>
+            Menampilkan <span className="font-semibold text-foreground">{users.length}</span> dari{' '}
+            <span className="font-semibold text-foreground">{totalUsers}</span> pengguna
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={page <= 1 || isLoading}
+              onClick={() => setPage((p) => p - 1)}
+              className="text-xs"
+            >
+              Sebelumnya
+            </Button>
+            <span className="text-xs font-semibold text-foreground px-2">
+              Halaman {page} dari {totalPages}
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={page >= totalPages || isLoading}
+              onClick={() => setPage((p) => p + 1)}
+              className="text-xs"
+            >
+              Berikutnya
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal Tambah User */}
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -318,10 +380,10 @@ export default function AdminUsers() {
               <select
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value as typeof newRole)}
-                className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary transition-colors"
+                className="mt-1 w-full rounded-xl border border-border bg-card px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary transition-colors h-10"
               >
                 <option value="student">Student (Santri / Siswa)</option>
-                <option value="teacher">Teacher (Pengajar)</option>
+                <option value="teacher">Teacher (Asatidz / Guru)</option>
               </select>
             </div>
 
@@ -337,7 +399,7 @@ export default function AdminUsers() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal Edit User using Radix Dialog */}
+      {/* Modal Edit User */}
       <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
         {editingUser && (
           <DialogContent className="max-w-md">
@@ -363,10 +425,10 @@ export default function AdminUsers() {
                 <select
                   value={editRole}
                   onChange={(e) => setEditRole(e.target.value as typeof editRole)}
-                  className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary transition-colors"
+                  className="mt-1 w-full rounded-xl border border-border bg-card px-3 py-2 text-xs font-medium text-foreground outline-none focus:border-primary transition-colors h-10"
                 >
                   <option value="student">Student (Santri / Siswa)</option>
-                  <option value="teacher">Teacher (Pengajar)</option>
+                  <option value="teacher">Teacher (Asatidz / Guru)</option>
                   <option value="admin">Administrator</option>
                 </select>
               </div>

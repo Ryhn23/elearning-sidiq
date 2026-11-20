@@ -71,8 +71,8 @@ export function AppShell({ children }: AppShellProps) {
           openMobileSidebar={() => setMobileOpen(true)}
         />
 
-        {/* Page Content Container */}
-        <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        {/* Page Content Container (Responsive Full-Width Canvas - SIDIQ ERP Standard) */}
+        <main className="flex-1 w-full max-w-[100vw] overflow-x-hidden p-4 md:p-8 pt-6 space-y-6">
           {children}
         </main>
       </div>
